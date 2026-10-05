@@ -1,0 +1,67 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two deployments at once; let a running one finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: npx ng test --watch=false
+
+      # The Firebase keys are not in the repo: write them from the FIREBASE_CONFIG secret.
+      - name: Firebase config
+        env:
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+        run: |
+          if [ -z "$FIREBASE_CONFIG" ]; then
+            echo "::error::Add the FIREBASE_CONFIG secret (Settings → Secrets and variables → Actions). See README."
+            exit 1
+          fi
+          printf '%s' "$FIREBASE_CONFIG" > public/firebase-config.json
+          node -e "JSON.parse(require('fs').readFileSync('public/firebase-config.json','utf8'))" \
+            || { echo "::error::FIREBASE_CONFIG is not valid JSON"; exit 1; }
+
+      # The site lives at https://<user>.github.io/<repo>/, so the base href is the repo name.
+      - name: Build
+        run: npx ng build --base-href "/${{ github.event.repository.name }}/"
+
+      # GitHub Pages has no SPA fallback: serve the app for unknown paths like /standings.
+      - name: SPA fallback
+        run: cp dist/icarus-fall/browser/index.html dist/icarus-fall/browser/404.html
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/icarus-fall/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

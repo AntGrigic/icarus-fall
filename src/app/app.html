@@ -1,0 +1,51 @@
+@if (store.mode() === 'demo') {
+  <div class="demo-banner">
+    <mat-icon>science</mat-icon>
+    <span>Demo mode: data is saved in this browser only. See README to connect Firebase.</span>
+  </div>
+}
+
+<mat-toolbar class="topbar">
+  <a class="brand" routerLink="/standings">
+    <img class="logo" src="logo.png" alt="Icarus Fall" width="40" height="40" />
+    <span class="brand-text">
+      <span class="brand-title">{{ store.activeLeague()?.name ?? 'Icarus Fall' }}</span>
+      @if (store.activeWeek(); as w) {
+        <span class="brand-sub">
+          @switch (w.status) {
+            @case ('running') { Week {{ w.week }} of {{ store.activeLeague()!.totalWeeks }} }
+            @case ('upcoming') { Starts soon }
+            @case ('finished') { Season finished }
+          }
+        </span>
+      }
+    </span>
+  </a>
+  <span class="spacer"></span>
+  <nav class="top-nav" aria-label="Main">
+    @for (item of nav; track item.path) {
+      <a mat-button [routerLink]="item.path" routerLinkActive="active">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+</mat-toolbar>
+
+<main>
+  <router-outlet />
+</main>
+
+<nav class="bottom-nav" aria-label="Main">
+  @for (item of nav; track item.path) {
+    <a [routerLink]="item.path" routerLinkActive="active">
+      <span class="icon-pill">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        @if (item.path === '/play' && cards.card()) {
+          <span class="badge" aria-label="Round in progress"></span>
+        }
+      </span>
+      <span>{{ item.label }}</span>
+    </a>
+  }
+</nav>

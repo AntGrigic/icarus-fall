@@ -1,0 +1,64 @@
+rules_version = '2';
+
+// Who may read and write what. Paste this into Firebase console → Firestore → Rules → Publish.
+//
+// - Everyone can read everything (standings are public).
+// - Players (silently signed in anonymously) can add players and add rounds to EMPTY slots only.
+//   A round slot is "<playerId>_<attempt>" inside a week document, and attempt is 1 or 2,
+//   so a third round for the same week, or overwriting someone's score, is impossible.
+// - Admins (a document admins/{uid} exists) can change anything.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // The document only has map field `field`, and that map only gained new keys.
+    function onlyAddsKeys(field) {
+      let diff = request.resource.data.get(field, {}).diff(resource.data.get(field, {}));
+      return request.resource.data.keys().hasOnly([field])
+          && diff.changedKeys().size() == 0
+          && diff.removedKeys().size() == 0;
+    }
+
+    function validWeek(leagueId, week) {
+      let league = get(/databases/$(database)/documents/leagues/$(leagueId)).data;
+      return int(week) >= 1 && int(week) <= league.totalWeeks;
+    }
+
+    match /admins/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false; // create admin documents by hand in the Firebase console
+    }
+
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /leagues/{leagueId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      match /weeks/{week} {
+        allow read: if true;
+        allow create: if isAdmin()
+          || (signedIn() && request.resource.data.keys().hasOnly(['rounds']) && validWeek(leagueId, week));
+        allow update: if isAdmin() || (signedIn() && onlyAddsKeys('rounds'));
+        allow delete: if isAdmin();
+      }
+    }
+
+    match /directory/players {
+      allow read: if true;
+      allow create: if isAdmin() || (signedIn() && request.resource.data.keys().hasOnly(['players']));
+      allow update: if isAdmin() || (signedIn() && onlyAddsKeys('players'));
+      allow delete: if isAdmin();
+    }
+  }
+}

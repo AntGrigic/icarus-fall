@@ -1,0 +1,116 @@
+@let d = draft();
+<form class="settings" (ngSubmit)="save()">
+  <section class="panel">
+    <div class="section-head">
+      <h2>{{ isNew() ? 'New league' : 'League' }}</h2>
+      @if (!isNew()) {
+        @if (isActive()) {
+          <span class="chip active-chip"><mat-icon>check</mat-icon> Active league</span>
+        } @else {
+          <button mat-stroked-button type="button" (click)="activate()">Make this the active league</button>
+        }
+      }
+    </div>
+    <p class="muted help">Players always enter scores for the active league.</p>
+
+    <div class="grid">
+      <mat-form-field appearance="outline" class="span-2">
+        <mat-label>Name</mat-label>
+        <input matInput name="name" [(ngModel)]="d.name" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>First day of week 1</mat-label>
+        <input matInput type="date" name="startDate" [(ngModel)]="d.startDate" required />
+        <mat-hint>Each week lasts 7 days</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Number of weeks</mat-label>
+        <input matInput type="number" min="1" max="52" name="totalWeeks" [(ngModel)]="d.totalWeeks" required />
+        @if (lastWeekText(d)) {
+          <mat-hint>Last week: {{ lastWeekText(d) }}</mat-hint>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Drop worst weeks</mat-label>
+        <mat-select name="dropWorst" [(ngModel)]="d.dropWorst">
+          <mat-option [value]="0">Off: every week counts</mat-option>
+          @for (n of weekNumbers(d).slice(0, -1); track n) {
+            <mat-option [value]="n">Drop {{ n }} worst week{{ n > 1 ? 's' : '' }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>A missed week counts as a worst week</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Current week</mat-label>
+        <mat-select name="override" [(ngModel)]="d.override">
+          <mat-option [value]="0">Automatic ({{ autoWeekText(d) }})</mat-option>
+          @for (n of weekNumbers(d); track n) {
+            <mat-option [value]="n">Force week {{ n }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>Use if a week was postponed</mat-hint>
+      </mat-form-field>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="section-head">
+      <h2>Course</h2>
+      <span class="muted">Par {{ totalPar(d) }}</span>
+    </div>
+    <p class="muted help">
+      The same layout every week. Close holes for a single week in the "Weeks & holes" tab.
+      Saved rounds keep the holes and pars they were played with.
+    </p>
+    <mat-form-field appearance="outline" class="holes-count">
+      <mat-label>Holes</mat-label>
+      <input
+        matInput
+        type="number"
+        min="1"
+        max="36"
+        name="holeCount"
+        [ngModel]="d.pars.length"
+        (ngModelChange)="setHoleCount(d, $event)"
+      />
+    </mat-form-field>
+    <div class="pars">
+      @for (par of d.pars; track $index) {
+        <label class="par">
+          <span class="hole">{{ $index + 1 }}</span>
+          <select [ngModel]="par" (ngModelChange)="setPar(d, $index, +$event)" [name]="'par' + $index" [attr.aria-label]="'Par for hole ' + ($index + 1)">
+            @for (p of parOptions; track p) {
+              <option [ngValue]="p">{{ p }}</option>
+            }
+          </select>
+        </label>
+      }
+    </div>
+  </section>
+
+  @if (errors().length) {
+    <ul class="errors error-text">
+      @for (e of errors(); track e) {
+        <li>{{ e }}</li>
+      }
+    </ul>
+  }
+
+  <div class="actions">
+    @if (isNew()) {
+      <mat-checkbox name="makeActive" [ngModel]="makeActive()" (ngModelChange)="makeActive.set($event)">
+        Make it the active league
+      </mat-checkbox>
+      <span class="spacer"></span>
+      <button mat-button type="button" (click)="cancelled.emit()">Cancel</button>
+    }
+    <button mat-flat-button type="submit" [disabled]="saving()">
+      <mat-icon>save</mat-icon>
+      {{ isNew() ? 'Create league' : 'Save changes' }}
+    </button>
+  </div>
+</form>

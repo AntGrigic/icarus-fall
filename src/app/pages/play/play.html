@@ -1,0 +1,125 @@
+<div class="page narrow">
+  @if (!store.ready() || (league() && !store.activeRounds())) {
+    <div class="loading"><mat-spinner diameter="40" /></div>
+  } @else if (!league()) {
+    <div class="empty-state">
+      <mat-icon>emoji_events</mat-icon>
+      <h2>No league yet</h2>
+      <p>An admin needs to create the league first.</p>
+    </div>
+  } @else {
+    @if (cards.card(); as card) {
+      <section class="resume panel">
+        <div>
+          <h2>Round in progress</h2>
+          <p class="muted">
+            {{ card.players.length }} player{{ card.players.length > 1 ? 's' : '' }} ·
+            hole {{ card.holes[card.holeIndex]?.number }} ·
+            {{ card.players[0]?.name }}{{ card.players.length > 1 ? ' +' + (card.players.length - 1) : '' }}
+          </p>
+        </div>
+        <div class="resume-actions">
+          <button mat-button (click)="discard()">Discard</button>
+          <a mat-flat-button routerLink="/play/card">
+            <mat-icon>play_arrow</mat-icon>
+            Resume
+          </a>
+        </div>
+      </section>
+    }
+
+    @switch (week()?.status) {
+      @case ('upcoming') {
+        <div class="empty-state">
+          <mat-icon>event</mat-icon>
+          <h2>The league hasn't started</h2>
+          <p>{{ league()!.name }} starts on {{ startsOn() }}.</p>
+        </div>
+      }
+      @case ('finished') {
+        <div class="empty-state">
+          <mat-icon>flag</mat-icon>
+          <h2>The season is over</h2>
+          <p>Check the final standings.</p>
+          <a mat-stroked-button routerLink="/standings">Standings</a>
+        </div>
+      }
+      @default {
+        <header class="page-head">
+          <div>
+            <h1>New round</h1>
+            <p class="muted sub">{{ weekText() }}</p>
+          </div>
+        </header>
+
+        @if (closedHoles().length) {
+          <div class="notice">
+            <mat-icon>warning_amber</mat-icon>
+            <span>Don't play hole{{ closedHoles().length > 1 ? 's' : '' }} {{ closedHoles().join(', ') }} this week. {{ closedHoles().length > 1 ? 'They are' : 'It is' }} left off the card.</span>
+          </div>
+        }
+
+        <p class="muted intro">
+          Add everyone in your flight. One person can keep score for the whole card. Each player picks which round they are playing.
+        </p>
+
+        <section class="flight">
+          @for (d of drafts(); track d.player.id; let i = $index) {
+            @let options = optionsFor(d.player);
+            <article class="player panel">
+              <div class="player-head">
+                <span class="num">{{ i + 1 }}</span>
+                <strong class="pname">{{ name(d.player) }}</strong>
+                <span class="chip">{{ d.player.division === 'W' ? 'Women' : 'Men' }}</span>
+                @if (i === 0) {
+                  <span class="chip keeper">Scorekeeper</span>
+                }
+                <button mat-icon-button (click)="remove(d.player.id)" aria-label="Remove from card">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <div class="options" role="radiogroup" [attr.aria-label]="'Round for ' + name(d.player)">
+                @for (o of options; track o.week + '-' + o.attempt) {
+                  <button
+                    type="button"
+                    role="radio"
+                    class="option"
+                    [class.selected]="d.option && sameSlot(d.option, o)"
+                    [class.repeat]="o.type === 'repeat'"
+                    [attr.aria-checked]="!!d.option && sameSlot(d.option, o)"
+                    (click)="choose(d.player.id, o)"
+                  >
+                    <mat-icon>{{ o.type === 'first' ? 'play_circle' : o.type === 'advance' ? 'fast_forward' : 'replay' }}</mat-icon>
+                    <span class="option-text">
+                      <span class="option-label">{{ o.label }}</span>
+                      <span class="option-hint">{{ o.hint }}</span>
+                    </span>
+                  </button>
+                } @empty {
+                  <p class="muted">Nothing left to play this week.</p>
+                }
+              </div>
+              @if (!d.option && options.length) {
+                <p class="choose muted">Choose a round</p>
+              }
+            </article>
+          }
+
+          <app-player-picker
+            [label]="drafts().length ? 'Add another player' : 'Who is playing?'"
+            [exclude]="selectedIds()"
+            [unavailable]="unavailable"
+            (picked)="add($event)"
+          />
+        </section>
+
+        <div class="start">
+          <button mat-flat-button class="start-btn" [disabled]="!canStart()" (click)="start()">
+            <mat-icon>sports</mat-icon>
+            Start round
+          </button>
+        </div>
+      }
+    }
+  }
+</div>

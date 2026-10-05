@@ -1,0 +1,147 @@
+<div class="page">
+  @if (!store.ready()) {
+    <div class="loading"><mat-spinner diameter="40" /></div>
+  } @else if (!league()) {
+    <div class="empty-state">
+      <mat-icon>emoji_events</mat-icon>
+      <h2>No league yet</h2>
+      <p>An admin needs to create the first league.</p>
+      <a mat-stroked-button routerLink="/admin">Go to admin</a>
+    </div>
+  } @else {
+    <header class="page-head">
+      <div class="title-block">
+        @if (store.sortedLeagues().length > 1) {
+          <mat-select
+            class="league-select"
+            [value]="league()!.id"
+            (valueChange)="store.viewedLeagueId.set($event)"
+            aria-label="League"
+          >
+            @for (l of store.sortedLeagues(); track l.id) {
+              <mat-option [value]="l.id">{{ l.name }}</mat-option>
+            }
+          </mat-select>
+        } @else {
+          <h1>{{ league()!.name }}</h1>
+        }
+        <p class="muted sub">{{ weekLabel() }}</p>
+      </div>
+      @if (isActiveLeague() && standings()?.info?.status === 'running') {
+        <a mat-flat-button routerLink="/play">
+          <mat-icon>edit_note</mat-icon>
+          Enter scores
+        </a>
+      }
+    </header>
+
+    @if (closedHoles().length) {
+      <div class="notice">
+        <mat-icon>warning_amber</mat-icon>
+        <span>
+          Hole{{ closedHoles().length > 1 ? 's' : '' }} {{ closedHoles().join(', ') }}
+          {{ closedHoles().length > 1 ? 'are' : 'is' }} closed this week.
+        </span>
+      </div>
+    }
+
+    <div class="toolbar">
+      <mat-button-toggle-group
+        [value]="division()"
+        (change)="setDivision($event.value)"
+        aria-label="Division"
+        hideSingleSelectionIndicator
+      >
+        @for (d of divisions; track d.id) {
+          <mat-button-toggle [value]="d.id">
+            {{ d.label }}
+            <span class="count">{{ standingsByDivision()?.[d.id]?.rows?.length ?? 0 }}</span>
+          </mat-button-toggle>
+        }
+      </mat-button-toggle-group>
+      <p class="muted rules">
+        Ranked by weeks played, then lowest total.
+        @if (league()!.dropWorst) {
+          Each player's {{ league()!.dropWorst }} worst week{{ league()!.dropWorst > 1 ? 's are' : ' is' }} dropped.
+        } @else {
+          Every week counts.
+        }
+      </p>
+    </div>
+
+    @if (!standings()) {
+      <div class="loading"><mat-spinner diameter="40" /></div>
+    } @else if (!standings()!.rows.length) {
+      <div class="empty-state">
+        <mat-icon>sports</mat-icon>
+        <h2>No rounds yet</h2>
+        <p>Scores show up here as soon as the first card is submitted.</p>
+      </div>
+    } @else {
+      @let s = standings()!;
+      <div class="table-wrap">
+        <table class="standings">
+          <thead>
+            <tr>
+              <th class="pos">#</th>
+              <th class="name">Player</th>
+              <th class="total">Total</th>
+              <th class="wks" title="Weeks counted">Wks</th>
+              @for (w of weeks(); track w) {
+                <th class="wk" [class.current]="w === s.info.week && s.info.status === 'running'">{{ w }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of s.rows; track row.playerId) {
+              <tr>
+                <td class="pos">{{ row.rank ? (row.tied ? 'T' : '') + row.rank : '–' }}</td>
+                <td class="name">
+                  <a [routerLink]="['/player', row.playerId]">{{ row.name }}</a>
+                </td>
+                <td class="total" [class]="totalClass(row.total)">{{ row.total | toPar }}</td>
+                <td class="wks">{{ row.counted }}/{{ s.countingWeeks }}</td>
+                @for (cell of row.cells; track $index) {
+                  <td
+                    class="wk"
+                    [class.current]="$index + 1 === s.info.week && s.info.status === 'running'"
+                    [class.dropped]="cell?.dropped"
+                    [class.pending]="cell?.pending"
+                    [title]="
+                      cell
+                        ? cell.round.strokes + ' strokes' +
+                          (cell.replaced ? ' · repeat (first try ' + (cell.replaced.toPar | toPar) + ')' : '') +
+                          (cell.pending ? ' · played in advance' : '') +
+                          (cell.dropped ? ' · dropped' : '')
+                        : ''
+                    "
+                  >
+                    @if (cell) {
+                      <span [class]="totalClass(cell.round.toPar)">{{ cell.round.toPar | toPar }}</span>
+                      @if (cell.replaced) {
+                        <sup>R</sup>
+                      } @else if (cell.round.type === 'advance') {
+                        <sup>A</sup>
+                      }
+                    } @else {
+                      <span class="none">·</span>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="legend muted">
+        <li><sup>R</sup> repeat round (replaces the first try)</li>
+        <li><sup>A</sup> played in advance</li>
+        <li><span class="sample pending">−2</span> counts once its week starts</li>
+        @if (league()!.dropWorst) {
+          <li><span class="sample dropped">+6</span> dropped week</li>
+        }
+      </ul>
+    }
+  }
+</div>

@@ -1,0 +1,178 @@
+@use '@angular/material' as mat;
+@use './theme-colors' as theme;
+
+html {
+  height: 100%;
+  color-scheme: light dark; // follow the phone's light/dark setting
+  @include mat.theme((
+    color: (
+      primary: theme.$primary-palette,
+      tertiary: theme.$tertiary-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+:root {
+  --page-max: 1040px;
+  --bar-bg: light-dark(#1b6d24, #12301a);
+  --bar-fg: #ffffff;
+  --gutter: 16px;
+  --radius: 14px;
+
+  --under: light-dark(#1b7f3b, #7ed99a);
+  --over: light-dark(#c4421a, #ffab8a);
+
+  --score-eagle: light-dark(#0d47a1, #9fc3ff);
+  --score-eagle-bg: light-dark(#d6e4ff, #1c3460);
+  --score-birdie: light-dark(#1b6e34, #9be3ae);
+  --score-birdie-bg: light-dark(#d4f2dc, #1d4a2a);
+  --score-bogey: light-dark(#8a4b00, #ffd08a);
+  --score-bogey-bg: light-dark(#ffe8c7, #523710);
+  --score-double: light-dark(#a3180f, #ffb4ab);
+  --score-double-bg: light-dark(#ffd9d4, #5c1d18);
+}
+
+body {
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  min-height: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+
+h1 {
+  font: var(--mat-sys-headline-small);
+}
+
+h2 {
+  font: var(--mat-sys-title-large);
+}
+
+a {
+  color: var(--mat-sys-primary);
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.under-par {
+  color: var(--under);
+}
+
+.over-par {
+  color: var(--over);
+}
+
+/* Score cells: components use var(--score-fg/--score-bg, <their default>) so these win over component styles. */
+.score-eagle {
+  --score-fg: var(--score-eagle);
+  --score-bg: var(--score-eagle-bg);
+}
+
+.score-birdie {
+  --score-fg: var(--score-birdie);
+  --score-bg: var(--score-birdie-bg);
+}
+
+.score-bogey {
+  --score-fg: var(--score-bogey);
+  --score-bg: var(--score-bogey-bg);
+}
+
+.score-double {
+  --score-fg: var(--score-double);
+  --score-bg: var(--score-double-bg);
+}
+
+/* Shared building blocks */
+
+.page {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 20px var(--gutter) 32px;
+  box-sizing: border-box;
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.panel {
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+  margin-bottom: 16px;
+
+  mat-icon {
+    flex: none;
+  }
+}
+
+.error-text {
+  color: var(--mat-sys-error);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.6;
+  }
+
+  h2 {
+    margin: 12px 0 6px;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font: var(--mat-sys-label-small);
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  white-space: nowrap;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 64px 0;
+}
