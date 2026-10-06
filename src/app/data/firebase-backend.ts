@@ -227,7 +227,7 @@ export class FirebaseBackend implements Backend {
 function toLeague(id: string, data: DocumentData): League {
   return {
     id,
-    name: data['name'] ?? 'League',
+    name: data['name'] ?? 'Liga',
     startDate: data['startDate'],
     totalWeeks: data['totalWeeks'] ?? 8,
     holes: data['holes'] ?? [],

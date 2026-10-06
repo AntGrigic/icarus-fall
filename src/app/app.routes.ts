@@ -4,17 +4,17 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'standings' },
   {
     path: 'standings',
-    title: 'Standings',
+    title: 'Poredak',
     loadComponent: () => import('./pages/standings/standings').then((m) => m.StandingsPage),
   },
   {
     path: 'player/:id',
-    title: 'Player',
+    title: 'Igrač',
     loadComponent: () => import('./pages/player/player').then((m) => m.PlayerPage),
   },
   {
     path: 'play',
-    title: 'Play',
+    title: 'Igraj',
     loadComponent: () => import('./pages/play/play').then((m) => m.PlayPage),
   },
   {

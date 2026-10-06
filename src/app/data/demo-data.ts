@@ -45,7 +45,7 @@ export function createDemoDb(now = new Date()): LocalDb {
   const leagueId = 'demo-league';
   const league: League = {
     id: leagueId,
-    name: `Autumn League ${now.getFullYear()}`,
+    name: `Jesenska liga ${now.getFullYear()}`,
     startDate: toYmd(start),
     totalWeeks: 8,
     holes: PARS.map((par, i) => ({ number: i + 1, par })),

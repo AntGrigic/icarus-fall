@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -6,12 +6,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { Router, RouterLink } from '@angular/router';
 
-import { RoundOption, roundOptions, sameSlot } from '../../core/league-math';
+import { RoundOption, roundOptions, sameSlot, throwingOrder } from '../../core/league-math';
 import { Round } from '../../core/models';
 import { DataStore, describeError, SaveResult } from '../../data/data-store';
 import { CardPlayer, CardService } from '../../play/card.service';
 import { Confirm } from '../../shared/confirm';
-import { scoreClass, ToParPipe, totalClass } from '../../shared/format';
+import { plural, scoreClass, ToParPipe, totalClass } from '../../shared/format';
 
 const MAX_STROKES = 20;
 
@@ -43,14 +43,32 @@ export class ScorecardPage {
   protected readonly scoreClass = scoreClass;
   protected readonly totalClass = totalClass;
 
+  /** Which way the last hole change went, so the next hole slides in from that side. */
+  protected readonly dir = signal<1 | -1>(1);
+  /** Last +/- per player, so the number rolls up or down. */
+  protected readonly lastChange = signal<Record<string, number>>({});
+  private readonly strip = viewChild<ElementRef<HTMLElement>>('strip');
+
   protected readonly index = computed(() => this.card()?.holeIndex ?? 0);
   protected readonly hole = computed(() => this.card()?.holes[this.index()] ?? null);
   protected readonly isLast = computed(() => this.index() === (this.card()?.holes.length ?? 0) - 1);
 
+  /** Players in throwing order for the hole on screen. */
+  protected readonly throwers = computed(() => {
+    const card = this.card();
+    if (!card) return [];
+    const byId = new Map(card.players.map((p) => [p.playerId, p]));
+    // Cards started before the order was drawn at random keep the order players were added in.
+    const start = card.startOrder ?? card.players.map((p) => p.playerId);
+    return throwingOrder(start, card.scores, this.index()).flatMap((id) => byId.get(id) ?? []);
+  });
+
   /** Why each player's round can't be submitted yet (null = ready). */
   protected readonly problems = computed(() => {
     const card = this.card();
-    if (!card) return {};
+    // While saving, Firestore already shows our own rounds in the live data before the server
+    // confirms them, which would flag every player as "already saved". It was checked before saving.
+    if (!card || this.saving()) return {};
     const out: Record<string, string | null> = {};
     for (const p of card.players) out[p.playerId] = this.problemFor(p);
     return out;
@@ -64,6 +82,20 @@ export class ScorecardPage {
   constructor() {
     effect(() => {
       if (!this.card() && this.view() !== 'done') this.router.navigate(['/play']);
+    });
+
+    // Keep the current hole's dot centred in the strip as the round moves along.
+    effect(() => {
+      const strip = this.strip()?.nativeElement;
+      const i = this.index();
+      if (!strip) return;
+      requestAnimationFrame(() => {
+        const dot = strip.children[i] as HTMLElement | undefined;
+        if (!dot) return;
+        const left = dot.offsetLeft - (strip.clientWidth - dot.offsetWidth) / 2;
+        const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+        strip.scrollTo({ left, behavior: smooth ? 'smooth' : 'auto' });
+      });
     });
   }
 
@@ -96,6 +128,7 @@ export class ScorecardPage {
     const hole = this.hole();
     if (!hole) return;
     const current = this.score(p, this.index()) ?? hole.par;
+    this.lastChange.update((last) => ({ ...last, [p.playerId]: delta }));
     this.cards.setScore(p.playerId, this.index(), Math.min(MAX_STROKES, Math.max(1, current + delta)));
   }
 
@@ -105,16 +138,19 @@ export class ScorecardPage {
   }
 
   protected next(): void {
+    this.dir.set(1);
     this.cards.fillPar(this.index());
     if (this.isLast()) this.view.set('review');
     else this.cards.goToHole(this.index() + 1);
   }
 
   protected prev(): void {
+    this.dir.set(-1);
     this.cards.goToHole(this.index() - 1);
   }
 
   protected goToHole(i: number): void {
+    this.dir.set(i < this.index() ? -1 : 1);
     this.cards.goToHole(i);
     this.view.set('hole');
   }
@@ -146,9 +182,9 @@ export class ScorecardPage {
 
   protected async discard(): Promise<void> {
     const ok = await this.confirm.ask({
-      title: 'Discard round?',
-      message: 'All scores on this card will be lost.',
-      confirmText: 'Discard',
+      title: 'Odbaciti rundu?',
+      message: 'Svi rezultati na ovom scorecardu bit će izgubljeni.',
+      confirmText: 'Odbaci',
       danger: true,
     });
     if (ok) this.cards.discard();
@@ -175,13 +211,13 @@ export class ScorecardPage {
   private problemFor(p: CardPlayer): string | null {
     const card = this.card()!;
     const missing = card.holes.filter((_, i) => this.score(p, i) == null).length;
-    if (missing) return `${missing} hole${missing > 1 ? 's' : ''} without a score.`;
-    if (this.store.activeLeague()?.id !== card.leagueId) return 'The active league changed. Ask the admin.';
+    if (missing) return `${missing} ${plural(missing, 'koš', 'koša', 'koševa')} bez rezultata.`;
+    if (this.store.activeLeague()?.id !== card.leagueId) return 'Aktivna liga se promijenila. Javi se adminu.';
     const options = this.optionsFor(p);
     if (!options.some((o) => sameSlot(o, p.option))) {
       return options.length
-        ? `${p.option.label} for week ${p.option.week} is already saved. Choose another round.`
-        : 'Nothing left to play this week. Remove this player from the card.';
+        ? `${p.option.label} za ${p.option.week}. tjedan već je spremljena. Odaberi drugu rundu.`
+        : 'Ovaj tjedan nema više rundi za igranje. Ukloni igrača sa scorecarda.';
     }
     return null;
   }

@@ -1,15 +1,14 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 
 import { computeStandings, disabledHoles, parseYmd, weekRange } from '../../core/league-math';
-import { Division, DIVISIONS } from '../../core/models';
+import { Division } from '../../core/models';
 import { DataStore } from '../../data/data-store';
-import { formatDay, formatRange, ToParPipe, totalClass } from '../../shared/format';
+import { DivisionSwitch } from '../../shared/division-switch';
+import { formatDay, formatRange, plural, ToParPipe, totalClass } from '../../shared/format';
 
 const DIVISION_KEY = 'icarus-fall.division';
 
@@ -18,10 +17,9 @@ const DIVISION_KEY = 'icarus-fall.division';
   imports: [
     RouterLink,
     MatButtonModule,
-    MatButtonToggleModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     MatSelectModule,
+    DivisionSwitch,
     ToParPipe,
   ],
   templateUrl: './standings.html',
@@ -29,8 +27,8 @@ const DIVISION_KEY = 'icarus-fall.division';
 })
 export class StandingsPage {
   protected readonly store = inject(DataStore);
-  protected readonly divisions = DIVISIONS;
   protected readonly totalClass = totalClass;
+  protected readonly plural = plural;
 
   protected readonly division = signal<Division>(readDivision());
   protected readonly league = this.store.viewedLeague;
@@ -50,22 +48,43 @@ export class StandingsPage {
 
   protected readonly standings = computed(() => this.standingsByDivision()?.[this.division()] ?? null);
 
+  protected readonly divisionCounts = computed(() => {
+    const all = this.standingsByDivision();
+    return { M: all?.M.rows.length ?? 0, W: all?.W.rows.length ?? 0 };
+  });
+
   protected readonly weeks = computed(() =>
     Array.from({ length: this.league()?.totalWeeks ?? 0 }, (_, i) => i + 1),
   );
+
+  /** One segment per week for the season progress strip. */
+  protected readonly season = computed(() => {
+    const info = this.standings()?.info;
+    if (!info) return [];
+    return this.weeks().map((week) => ({
+      week,
+      state:
+        info.status === 'finished' || (info.status === 'running' && week < info.week)
+          ? 'done'
+          : info.status === 'running' && week === info.week
+            ? 'now'
+            : 'next',
+    }));
+  });
 
   protected readonly weekLabel = computed(() => {
     const league = this.league();
     const info = this.standings()?.info;
     if (!league || !info) return '';
     const range = formatRange(weekRange(league, info.week));
+    const weeks = `${league.totalWeeks} ${plural(league.totalWeeks, 'tjedan', 'tjedna', 'tjedana')}`;
     switch (info.status) {
       case 'upcoming':
-        return `Starts ${formatDay(parseYmd(league.startDate))} · ${league.totalWeeks} weeks`;
+        return `Počinje ${formatDay(parseYmd(league.startDate))} · ${weeks}`;
       case 'finished':
-        return `Finished · ${league.totalWeeks} weeks`;
+        return `Završeno · ${weeks}`;
       default:
-        return `Week ${info.week} of ${league.totalWeeks} · ${range}`;
+        return `Tjedan ${info.week} od ${league.totalWeeks} · ${range}`;
     }
   });
 

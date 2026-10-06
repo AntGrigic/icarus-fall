@@ -6,6 +6,7 @@ import {
   nameKey,
   playableHoles,
   roundOptions,
+  throwingOrder,
   tidyName,
 } from './league-math';
 import { Attempt, League, Player, Round, RoundType } from './models';
@@ -195,5 +196,27 @@ describe('names and formatting', () => {
 
   it('formats scores relative to par', () => {
     expect([formatToPar(-3), formatToPar(0), formatToPar(4), formatToPar(null)]).toEqual(['-3', 'E', '+4', '–']);
+  });
+});
+
+describe('throwingOrder', () => {
+  const start = ['aki', 'bato', 'cro'];
+
+  it('keeps the start order on the first hole', () => {
+    expect(throwingOrder(start, { aki: [3], bato: [2], cro: [4] }, 0)).toEqual(start);
+  });
+
+  it('lets the best score on the previous hole throw first', () => {
+    expect(throwingOrder(start, { aki: [3], bato: [2], cro: [4] }, 1)).toEqual(['bato', 'aki', 'cro']);
+  });
+
+  it('keeps the order from the hole before when scores tie', () => {
+    const scores = { aki: [3, 3], bato: [2, 3], cro: [4, 3] };
+    expect(throwingOrder(start, scores, 2)).toEqual(['bato', 'aki', 'cro']);
+  });
+
+  it('skips holes that are not fully scored yet', () => {
+    const scores = { aki: [3, null], bato: [2, 2], cro: [4, 5] };
+    expect(throwingOrder(start, scores, 2)).toEqual(['bato', 'aki', 'cro']);
   });
 });

@@ -1,0 +1,182 @@
+/*
+ * The backdrop behind every page (markup in app.html): a starfield, a soft glow and Jupiter
+ * slowly turning in the corner. Only the cloud streaks and the Red Spot move, very slowly.
+ */
+
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 0% 0%, light-dark(#fff7ea, #1a1430) 0%, transparent 60%),
+    linear-gradient(180deg, var(--sky), light-dark(#f2e2cc, #0e0a18));
+}
+
+.sky .stars,
+.sky .stars::after {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.4px 1.4px at 23px 41px, #fff 50%, transparent 100%),
+    radial-gradient(1px 1px at 87px 143px, #ffe6c4 50%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 151px 77px, #fff 50%, transparent 100%),
+    radial-gradient(1px 1px at 199px 191px, #d6e2ff 50%, transparent 100%),
+    radial-gradient(1.6px 1.6px at 243px 23px, #fff 50%, transparent 100%);
+  background-size: 260px 220px;
+}
+
+.sky .stars {
+  opacity: 0.6;
+
+  &::after {
+    content: '';
+    background-size: 390px 310px;
+    background-position: 130px 95px;
+  }
+}
+
+.sky .nebula {
+  position: absolute;
+  border-radius: 50%;
+
+  &.one {
+    width: 75vmax;
+    height: 75vmax;
+    left: -32vmax;
+    top: -40vmax;
+    background: radial-gradient(closest-side, light-dark(rgb(236 160 80 / 0.34), rgb(112 72 196 / 0.3)), transparent);
+  }
+
+  &.two {
+    width: 55vmax;
+    height: 55vmax;
+    right: -18vmax;
+    top: 8vmax;
+    background: radial-gradient(closest-side, light-dark(rgb(214 110 70 / 0.16), rgb(208 73 46 / 0.15)), transparent);
+  }
+}
+
+.sky .world {
+  --size: clamp(440px, 92vmin, 980px);
+  position: absolute;
+  width: var(--size);
+  aspect-ratio: 1;
+  right: calc(var(--size) * -0.4);
+  bottom: calc(var(--size) * -0.42);
+  rotate: -16deg;
+  animation: fade-in 1.2s ease both;
+}
+
+.sky .planet {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    #cbb59c 0%,
+    #e8d3b2 6%,
+    #d9b58a 10%,
+    #f2e3c8 15%,
+    #bf8558 20%,
+    #9d5634 24%,
+    #c98a5a 27%,
+    #f3e4c9 32%,
+    #fbf0dc 38%,
+    #e2bf91 44%,
+    #a85c37 48%,
+    #8c4a2f 51%,
+    #c27c4c 55%,
+    #ecd6b2 60%,
+    #f5e8d1 66%,
+    #d6ad80 72%,
+    #b07650 77%,
+    #e3c8a3 82%,
+    #c9ab8f 88%,
+    #9f8b84 94%,
+    #857674 100%
+  );
+  box-shadow:
+    0 0 70px 4px light-dark(rgb(214 140 70 / 0.25), rgb(255 170 100 / 0.22)),
+    0 0 220px 30px light-dark(rgb(214 140 70 / 0.12), rgb(255 150 90 / 0.1));
+
+  /* Sunlight from the top left, night on the far side. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 28% 24%, rgb(255 255 255 / 0.3), transparent 38%),
+      radial-gradient(circle at 34% 30%, transparent 46%, light-dark(rgb(120 64 26 / 0.4), rgb(6 4 14 / 0.92)) 80%);
+  }
+}
+
+/* Cloud streaks riding the jet streams; neighbouring belts turn in opposite directions. */
+.sky .jets {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(100% + 640px);
+  background-size: 320px 100%;
+  animation: jet 160s linear infinite;
+
+  &.east {
+    background-image:
+      radial-gradient(70px 7px at 40px 17%, rgb(255 246 228 / 0.7), transparent),
+      radial-gradient(110px 9px at 190px 30%, rgb(150 80 45 / 0.45), transparent),
+      radial-gradient(80px 8px at 120px 47%, rgb(120 60 35 / 0.5), transparent),
+      radial-gradient(60px 6px at 260px 63%, rgb(255 244 222 / 0.65), transparent),
+      radial-gradient(120px 9px at 80px 80%, rgb(160 110 75 / 0.45), transparent);
+  }
+
+  &.west {
+    animation-duration: 220s;
+    animation-direction: reverse;
+    background-image:
+      radial-gradient(90px 6px at 150px 11%, rgb(255 240 215 / 0.55), transparent),
+      radial-gradient(70px 8px at 30px 38%, rgb(255 250 236 / 0.6), transparent),
+      radial-gradient(100px 7px at 230px 55%, rgb(236 200 160 / 0.6), transparent),
+      radial-gradient(80px 7px at 110px 72%, rgb(130 70 40 / 0.4), transparent),
+      radial-gradient(90px 8px at 280px 90%, rgb(255 235 210 / 0.45), transparent);
+  }
+}
+
+.sky .red-spot {
+  position: absolute;
+  top: 60%;
+  left: 0;
+  width: 17%;
+  height: 8.5%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #ee9472 0%, #d0533a 42%, #a8432c 72%, rgb(196 120 80 / 0) 100%);
+  animation: spot-travel 140s linear infinite;
+}
+
+@media (prefers-color-scheme: light) {
+  .sky .stars {
+    display: none;
+  }
+
+  .sky .world {
+    opacity: 0.6;
+  }
+}
+
+@keyframes jet {
+  to {
+    transform: translateX(-640px);
+  }
+}
+
+@keyframes spot-travel {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(620%);
+  }
+}

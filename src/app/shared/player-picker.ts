@@ -2,7 +2,6 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -10,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { fullName, matchesSearch, tidyName } from '../core/league-math';
 import { Division, DIVISIONS, Player } from '../core/models';
 import { DataStore } from '../data/data-store';
+import { DivisionSwitch } from './division-switch';
 
 const NEW_PLAYER = '__new__';
 
@@ -23,10 +23,10 @@ const NEW_PLAYER = '__new__';
     FormsModule,
     MatAutocompleteModule,
     MatButtonModule,
-    MatButtonToggleModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    DivisionSwitch,
   ],
   template: `
     @if (!creating()) {
@@ -39,7 +39,7 @@ const NEW_PLAYER = '__new__';
           [matAutocomplete]="auto"
           [value]="query()"
           (input)="query.set($any($event.target).value)"
-          placeholder="Start typing your name"
+          placeholder="Počni upisivati ime"
           autocomplete="off"
         />
         <mat-autocomplete
@@ -56,35 +56,31 @@ const NEW_PLAYER = '__new__';
           }
           <mat-option [value]="newPlayer" class="new-option">
             <mat-icon>person_add</mat-icon>
-            First time? Add {{ query().trim() ? '"' + query().trim() + '"' : 'a new player' }}
+            Prvi put? Dodaj {{ query().trim() ? '"' + query().trim() + '"' : 'novog igrača' }}
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
     } @else {
       <form class="new-player panel" (ngSubmit)="create()">
-        <h3>New player</h3>
+        <h3>Novi igrač</h3>
         <div class="fields">
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>First name</mat-label>
+            <mat-label>Ime</mat-label>
             <input matInput name="firstName" [(ngModel)]="firstName" required autocomplete="given-name" />
           </mat-form-field>
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Last name</mat-label>
+            <mat-label>Prezime</mat-label>
             <input matInput name="lastName" [(ngModel)]="lastName" required autocomplete="family-name" />
           </mat-form-field>
         </div>
-        <mat-button-toggle-group name="division" [(ngModel)]="division" aria-label="Division">
-          @for (d of divisions; track d.id) {
-            <mat-button-toggle [value]="d.id">{{ d.label }}</mat-button-toggle>
-          }
-        </mat-button-toggle-group>
+        <app-division-switch [(value)]="division" />
         @if (existing(); as e) {
-          <p class="muted hint">{{ name(e) }} is already registered and will be added.</p>
+          <p class="muted hint">Igrač {{ name(e) }} već postoji i bit će dodan.</p>
         }
         <div class="actions">
-          <button mat-button type="button" (click)="cancel()">Cancel</button>
+          <button mat-button type="button" (click)="cancel()">Odustani</button>
           <button mat-flat-button type="submit" [disabled]="!firstName().trim() || !lastName().trim()">
-            Add player
+            Dodaj igrača
           </button>
         </div>
       </form>
@@ -125,14 +121,13 @@ const NEW_PLAYER = '__new__';
 export class PlayerPicker {
   private readonly store = inject(DataStore);
 
-  readonly label = input('Add player');
+  readonly label = input('Dodaj igrača');
   /** Players already chosen; they are hidden from the list. */
   readonly exclude = input<string[]>([]);
   /** Returns why a player can't be picked (shown greyed out), or null. */
   readonly unavailable = input<(p: Player) => string | null>(() => null);
   readonly picked = output<Player>();
 
-  protected readonly divisions = DIVISIONS;
   protected readonly newPlayer = NEW_PLAYER;
   protected readonly name = fullName;
   protected readonly blank = () => '';

@@ -88,6 +88,24 @@ export function scoreTotals(holes: HoleScore[]): { strokes: number; par: number;
   return { strokes, par, toPar: strokes - par };
 }
 
+/**
+ * Who throws first on a hole: the lowest score on the previous hole goes first, and ties keep
+ * the order they threw in on that hole (the usual disc golf rule). A hole that not everyone has
+ * a score on yet leaves the order as it was.
+ */
+export function throwingOrder(
+  startOrder: string[],
+  scores: Record<string, (number | null)[]>,
+  holeIndex: number,
+): string[] {
+  let order = startOrder;
+  for (let i = 0; i < holeIndex; i++) {
+    if (order.some((id) => scores[id]?.[i] == null)) continue;
+    order = [...order].sort((a, b) => scores[a][i]! - scores[b][i]!); // stable: ties keep their order
+  }
+  return order;
+}
+
 /** Key of a round inside its week document: one slot per player per attempt. */
 export function roundKey(playerId: string, attempt: Attempt): string {
   return `${playerId}_${attempt}`;
@@ -159,14 +177,14 @@ export function roundOptions(league: League, week: number, playerRounds: Round[]
 
   const first = find(week, 1);
   if (!first) {
-    options.push({ week, attempt: 1, type: 'first', label: 'First round', hint: `Week ${week}` });
+    options.push({ week, attempt: 1, type: 'first', label: 'Prva runda', hint: `Tjedan ${week}` });
   } else if (!find(week, 2)) {
     options.push({
       week,
       attempt: 2,
       type: 'repeat',
-      label: 'Repeat round',
-      hint: `Week ${week} · replaces ${formatToPar(first.toPar)}`,
+      label: 'Ponovljena runda',
+      hint: `Tjedan ${week} · zamjenjuje ${formatToPar(first.toPar)}`,
     });
   }
 
@@ -174,14 +192,14 @@ export function roundOptions(league: League, week: number, playerRounds: Round[]
   if (next <= league.totalWeeks) {
     const advance = find(next, 1);
     if (!advance) {
-      options.push({ week: next, attempt: 1, type: 'advance', label: 'Round in advance', hint: `Week ${next}` });
+      options.push({ week: next, attempt: 1, type: 'advance', label: 'Runda unaprijed', hint: `Tjedan ${next}` });
     } else if (!find(next, 2)) {
       options.push({
         week: next,
         attempt: 2,
         type: 'repeat',
-        label: 'Repeat advance round',
-        hint: `Week ${next} · replaces ${formatToPar(advance.toPar)}`,
+        label: 'Ponovljena runda unaprijed',
+        hint: `Tjedan ${next} · zamjenjuje ${formatToPar(advance.toPar)}`,
       });
     }
   }
@@ -191,11 +209,11 @@ export function roundOptions(league: League, week: number, playerRounds: Round[]
 export function roundTypeLabel(type: RoundType): string {
   switch (type) {
     case 'first':
-      return 'First round';
+      return 'Prva runda';
     case 'advance':
-      return 'In advance';
+      return 'Unaprijed';
     case 'repeat':
-      return 'Repeat';
+      return 'Ponovljena';
   }
 }
 

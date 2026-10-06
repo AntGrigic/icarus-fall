@@ -1,16 +1,17 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { fullName, matchesSearch } from '../../core/league-math';
-import { Division, DIVISIONS, League, Player } from '../../core/models';
+import { Division, League, Player } from '../../core/models';
 import { DataStore, describeError } from '../../data/data-store';
 import { Confirm } from '../../shared/confirm';
+import { DivisionSwitch } from '../../shared/division-switch';
+import { plural } from '../../shared/format';
 
 interface PlayerForm {
   firstName: string;
@@ -23,55 +24,51 @@ interface PlayerForm {
   imports: [
     FormsModule,
     MatButtonModule,
-    MatButtonToggleModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    DivisionSwitch,
   ],
   template: `
     <div class="players">
       <div class="bar">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
           <mat-icon matPrefix>search</mat-icon>
-          <mat-label>Search players</mat-label>
+          <mat-label>Traži igrače</mat-label>
           <input matInput [ngModel]="query()" (ngModelChange)="query.set($event)" />
         </mat-form-field>
         <button mat-flat-button (click)="startAdd()">
           <mat-icon>person_add</mat-icon>
-          Add player
+          Dodaj igrača
         </button>
       </div>
 
       @if (editingId() !== null) {
         <form class="panel edit" (ngSubmit)="save()">
-          <h3>{{ editingId() ? 'Edit player' : 'New player' }}</h3>
+          <h3>{{ editingId() ? 'Uredi igrača' : 'Novi igrač' }}</h3>
           <div class="fields">
             <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>First name</mat-label>
+              <mat-label>Ime</mat-label>
               <input matInput name="first" [(ngModel)]="form.firstName" required />
             </mat-form-field>
             <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Last name</mat-label>
+              <mat-label>Prezime</mat-label>
               <input matInput name="last" [(ngModel)]="form.lastName" required />
             </mat-form-field>
-            <mat-button-toggle-group name="division" [(ngModel)]="form.division" aria-label="Division">
-              @for (d of divisions; track d.id) {
-                <mat-button-toggle [value]="d.id">{{ d.label }}</mat-button-toggle>
-              }
-            </mat-button-toggle-group>
+            <app-division-switch [(value)]="form.division" />
           </div>
           @if (formError()) {
             <p class="error-text">{{ formError() }}</p>
           }
           <div class="actions">
-            <button mat-button type="button" (click)="editingId.set(null)">Cancel</button>
-            <button mat-flat-button type="submit">Save</button>
+            <button mat-button type="button" (click)="editingId.set(null)">Odustani</button>
+            <button mat-flat-button type="submit">Spremi</button>
           </div>
         </form>
       }
 
       <p class="muted count">
-        {{ filtered().length }} player{{ filtered().length === 1 ? '' : 's' }} · rounds counted in {{ league().name }}
+        {{ filtered().length }} {{ plural(filtered().length, 'igrač', 'igrača', 'igrača') }} · broj rundi u ligi {{ league().name }}
       </p>
 
       <ul class="list panel">
@@ -80,18 +77,19 @@ interface PlayerForm {
             <div class="who">
               <span class="pname">{{ name(p) }}</span>
               <span class="muted meta">
-                {{ p.division === 'W' ? 'Women' : 'Men' }} · {{ roundCounts().get(p.id) ?? 0 }} rounds
+                @let rounds = roundCounts().get(p.id) ?? 0;
+                {{ p.division === 'W' ? 'Žene' : 'Muškarci' }} · {{ rounds }} {{ plural(rounds, 'runda', 'runde', 'rundi') }}
               </span>
             </div>
-            <button mat-icon-button (click)="startEdit(p)" [attr.aria-label]="'Edit ' + name(p)">
+            <button mat-icon-button (click)="startEdit(p)" [attr.aria-label]="'Uredi ' + name(p)">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button (click)="remove(p)" [attr.aria-label]="'Delete ' + name(p)">
+            <button mat-icon-button (click)="remove(p)" [attr.aria-label]="'Obriši ' + name(p)">
               <mat-icon>delete</mat-icon>
             </button>
           </li>
         } @empty {
-          <li class="muted">No players found.</li>
+          <li class="muted">Nema pronađenih igrača.</li>
         }
       </ul>
     </div>
@@ -104,8 +102,9 @@ interface PlayerForm {
     .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: center; }
     .actions { display: flex; justify-content: flex-end; gap: 8px; }
     .count { margin: 0; font: var(--mat-sys-body-small); }
+    .edit { animation: rise 300ms var(--ease-out) both; }
     .list { list-style: none; margin: 0; padding: 4px 8px 4px 16px; }
-    .list li { display: flex; align-items: center; gap: 4px; padding: 6px 0; border-bottom: 1px solid var(--mat-sys-outline-variant); }
+    .list li { display: flex; align-items: center; gap: 4px; padding: 8px 0; border-bottom: 1px solid var(--glass-border); }
     .list li:last-child { border-bottom: 0; }
     .who { flex: 1; display: flex; flex-direction: column; min-width: 0; }
     .pname { font-weight: 500; }
@@ -119,8 +118,8 @@ export class PlayersAdmin {
 
   readonly league = input.required<League>();
 
-  protected readonly divisions = DIVISIONS;
   protected readonly name = fullName;
+  protected readonly plural = plural;
   protected readonly query = signal('');
   /** null = form closed, '' = adding, otherwise the id being edited. */
   protected readonly editingId = signal<string | null>(null);
@@ -153,13 +152,13 @@ export class PlayersAdmin {
   protected async save(): Promise<void> {
     const { firstName, lastName, division } = this.form;
     if (!firstName.trim() || !lastName.trim()) {
-      this.formError.set('First and last name are required.');
+      this.formError.set('Ime i prezime su obavezni.');
       return;
     }
     const id = this.editingId();
     const duplicate = this.store.findPlayerByName(firstName, lastName);
     if (duplicate && duplicate.id !== id) {
-      this.formError.set(`${fullName(duplicate)} already exists.`);
+      this.formError.set(`${fullName(duplicate)} već postoji.`);
       return;
     }
     try {
@@ -170,7 +169,7 @@ export class PlayersAdmin {
         await this.store.addPlayer({ firstName, lastName, division });
       }
       this.editingId.set(null);
-      this.snackBar.open('Player saved', undefined, { duration: 2000 });
+      this.snackBar.open('Igrač je spremljen', undefined, { duration: 2000 });
     } catch (e) {
       this.formError.set(describeError(e));
     }
@@ -179,17 +178,18 @@ export class PlayersAdmin {
   protected async remove(p: Player): Promise<void> {
     const count = this.roundCounts().get(p.id) ?? 0;
     const ok = await this.confirm.ask({
-      title: `Delete ${fullName(p)}?`,
+      title: `Obrisati igrača ${fullName(p)}?`,
       message:
-        (count ? `Their ${count} round${count > 1 ? 's' : ''} in ${this.league().name} will be deleted too. ` : '') +
-        'Rounds in other leagues keep their name.',
-      confirmText: 'Delete',
+        (count
+          ? `Obrisat će se i ${count} ${plural(count, 'runda', 'runde', 'rundi')} ovog igrača u ligi ${this.league().name}. `
+          : '') + 'Runde u drugim ligama zadržavaju ime igrača.',
+      confirmText: 'Obriši',
       danger: true,
     });
     if (!ok) return;
     try {
       await this.store.deletePlayer(p, this.league());
-      this.snackBar.open(`${fullName(p)} deleted`, undefined, { duration: 2500 });
+      this.snackBar.open(`Obrisano: ${fullName(p)}`, undefined, { duration: 2500 });
     } catch (e) {
       this.store.reportError(e);
     }

@@ -1,4 +1,4 @@
-# Icarus Fall · Disc Golf League
+# Jupiter shades · Disc Golf League
 
 Scorecards and standings for a weekly disc golf league, a bit like UDisc or Disc Golf Metrix, but just for your league.
 
@@ -14,15 +14,15 @@ Built with Angular 21 + Angular Material, Firebase (Firestore + Auth) for data, 
 
 ## League rules (how the app counts)
 
-| Rule | How it works |
-|---|---|
-| Weeks | Week 1 starts on the league's start date; every week is 7 days. The admin can force a different current week (for example, after a rained-out week). |
-| Ranking | **More weeks played first, then lowest total to par.** Every week that has started counts, so someone who played 3 weeks at −23 can't beat someone who played all 8 weeks at −20. |
-| Drop worst weeks (optional) | The admin can drop each player's N worst weeks. A missed week counts as the worst possible week, so it is dropped first. |
-| First round | One per week, for the current week. Someone who joins in week 4 just starts in week 4. |
-| Repeat round | One per week. **The repeat always counts instead of the first round, even if it's worse.** Only for the current week, or for next week's round played in advance. Past weeks can't be repeated. |
-| Round in advance | Play next week's round early. It shows on the table straight away and counts once its week starts. It can be repeated once, now or when its week arrives. |
-| Closed holes | The admin can close holes for a single week (e.g. 9 and 10 when they're slippery). They are left off that week's scorecard. Totals compare scores to par, so a shorter round is still fair. |
+| Rule                        | How it works                                                                                                                                                                                    |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Weeks                       | Week 1 starts on the league's start date; every week is 7 days. The admin can force a different current week (for example, after a rained-out week).                                            |
+| Ranking                     | **More weeks played first, then lowest total to par.** Every week that has started counts, so someone who played 3 weeks at −23 can't beat someone who played all 8 weeks at −20.               |
+| Drop worst weeks (optional) | The admin can drop each player's N worst weeks. A missed week counts as the worst possible week, so it is dropped first.                                                                        |
+| First round                 | One per week, for the current week. Someone who joins in week 4 just starts in week 4.                                                                                                          |
+| Repeat round                | One per week. **The repeat always counts instead of the first round, even if it's worse.** Only for the current week, or for next week's round played in advance. Past weeks can't be repeated. |
+| Round in advance            | Play next week's round early. It shows on the table straight away and counts once its week starts. It can be repeated once, now or when its week arrives.                                       |
+| Closed holes                | The admin can close holes for a single week (e.g. 9 and 10 when they're slippery). They are left off that week's scorecard. Totals compare scores to par, so a shorter round is still fair.     |
 
 ---
 
@@ -46,12 +46,12 @@ npm test          # unit tests for the league rules (src/app/core/league-math.sp
 GitHub Pages can only host files. The scores need a shared database, which is Firebase. The free Spark plan needs no credit card and is far more than a league needs: a whole league loads in about 10 document reads.
 
 1. **Create a project** at https://console.firebase.google.com. Google Analytics is not needed.
-2. **Firestore:** *Databases & Storage → Firestore → Create database*, **Standard edition**, pick a region near you.
-3. **Rules:** open the *Rules* tab, replace everything with the contents of [`firestore.rules`](firestore.rules), and click **Publish**.
-4. **Authentication:** *Authentication → Get started*, then under *Sign-in method* enable:
+2. **Firestore:** _Databases & Storage → Firestore → Create database_, **Standard edition**, pick a region near you.
+3. **Rules:** open the _Rules_ tab, replace everything with the contents of [`firestore.rules`](firestore.rules), and click **Publish**.
+4. **Authentication:** _Authentication → Get started_, then under _Sign-in method_ enable:
    - **Anonymous** (players get an invisible account, so there's still no login screen)
    - **Google** (admins sign in with their Gmail; pick your Gmail as the support email)
-5. **Web app config:** *Project settings (gear) → General → Your apps → Web (`</>`)*, register an app (no hosting), and save its values as **`public/firebase-config.json`**:
+5. **Web app config:** _Project settings (gear) → General → Your apps → Web (`</>`)_, register an app (no hosting), and save its values as **`public/firebase-config.json`**:
    ```json
    {
      "apiKey": "AIza…",
@@ -64,8 +64,8 @@ GitHub Pages can only host files. The scores need a shared database, which is Fi
    ```
    This file is **git-ignored**, so it never goes to GitHub. The deploy workflow gets it from a repository secret instead (see below).
 6. **Make yourself admin:** run the app, open **Admin → Sign in with Google**. The page shows your **UID** with a copy button.
-   In Firestore, *Start collection* `admins` → Document ID = **that UID** → add any field (e.g. `name: "Antonio"`) → Save. The admin page unlocks by itself.
-7. **Authorized domain:** *Authentication → Settings → Authorized domains → Add domain* `<your-github-user>.github.io` (`localhost` is already allowed).
+   In Firestore, _Start collection_ `admins` → Document ID = **that UID** → add any field (e.g. `name: "Antonio"`) → Save. The admin page unlocks by itself.
+7. **Authorized domain:** _Authentication → Settings → Authorized domains → Add domain_ `<your-github-user>.github.io` (`localhost` is already allowed).
 
 Then, in **Admin**, **create the league**: name, first day of week 1, number of weeks, holes and pars. The first league automatically becomes the active league.
 
@@ -83,6 +83,7 @@ The workflow in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) t
    - Secret: the **whole contents** of your `public/firebase-config.json`
 
    The workflow writes it back into `public/firebase-config.json` while building, so the keys stay out of the repo. If the secret is missing, the build stops with a clear error.
+
 3. Push to `main`:
    ```bash
    git add .

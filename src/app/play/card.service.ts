@@ -16,7 +16,10 @@ export interface Card {
   leagueId: string;
   createdAt: number;
   holes: Hole[];
+  /** In the order they were added; the first one is the scorekeeper. */
   players: CardPlayer[];
+  /** Throwing order on the first hole (playerIds), drawn at random when the round starts. */
+  startOrder?: string[];
   /** playerId → strokes per hole (same order as `holes`); null = not entered yet. */
   scores: Record<string, (number | null)[]>;
   holeIndex: number;
@@ -78,7 +81,11 @@ export class CardService {
   }
 
   removePlayer(playerId: string): void {
-    this.patch((c) => ({ ...c, players: c.players.filter((p) => p.playerId !== playerId) }));
+    this.patch((c) => ({
+      ...c,
+      players: c.players.filter((p) => p.playerId !== playerId),
+      startOrder: c.startOrder?.filter((id) => id !== playerId),
+    }));
   }
 
   buildRounds(card: Card): Round[] {

@@ -3,8 +3,10 @@ import {
   inject,
   Injectable,
   isDevMode,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
+import { MatIconRegistry } from '@angular/material/icon';
 import { Title } from '@angular/platform-browser';
 import {
   provideRouter,
@@ -12,19 +14,20 @@ import {
   TitleStrategy,
   withComponentInputBinding,
   withInMemoryScrolling,
+  withViewTransitions,
 } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 
 import { routes } from './app.routes';
 
-/** Browser tab shows "Standings · Icarus Fall". */
+/** Browser tab shows "Standings · Jupiter shades". */
 @Injectable({ providedIn: 'root' })
 class AppTitleStrategy extends TitleStrategy {
   private readonly title = inject(Title);
 
   override updateTitle(snapshot: RouterStateSnapshot): void {
     const page = this.buildTitle(snapshot);
-    this.title.setTitle(page ? `${page} · Icarus Fall` : 'Icarus Fall');
+    this.title.setTitle(page ? `${page} · Jupiter shades` : 'Jupiter shades');
   }
 }
 
@@ -35,7 +38,13 @@ export const appConfig: ApplicationConfig = {
       routes,
       withComponentInputBinding(),
       withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
+      // Pages glide in and out (animations in styles.scss); browsers without support just swap.
+      withViewTransitions({ skipInitialTransition: true }),
     ),
+    // Rounded icon font (loaded in index.html) instead of the default sharp one.
+    provideAppInitializer(() => {
+      inject(MatIconRegistry).setDefaultFontSetClass('material-icons-round', 'mat-ligature-font');
+    }),
     { provide: TitleStrategy, useClass: AppTitleStrategy },
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),

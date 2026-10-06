@@ -1,8 +1,8 @@
 export type Division = 'M' | 'W';
 
 export const DIVISIONS: readonly { id: Division; label: string }[] = [
-  { id: 'M', label: 'Men' },
-  { id: 'W', label: 'Women' },
+  { id: 'M', label: 'Muškarci' },
+  { id: 'W', label: 'Žene' },
 ];
 
 export interface Hole {

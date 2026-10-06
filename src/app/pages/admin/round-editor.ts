@@ -22,12 +22,12 @@ export interface RoundEditorData {
   selector: 'app-round-editor',
   imports: [FormsModule, MatButtonModule, MatDialogModule, MatFormFieldModule, MatSelectModule, ToParPipe],
   template: `
-    <h2 mat-dialog-title>{{ isNew ? 'Add round' : 'Edit round' }}</h2>
+    <h2 mat-dialog-title>{{ isNew ? 'Dodaj rundu' : 'Uredi rundu' }}</h2>
     <mat-dialog-content>
       @if (isNew) {
         <div class="fields">
           <mat-form-field appearance="outline" class="player-field">
-            <mat-label>Player</mat-label>
+            <mat-label>Igrač</mat-label>
             <mat-select [ngModel]="playerId()" (ngModelChange)="playerId.set($event)" name="player">
               @for (p of store.sortedPlayers(); track p.id) {
                 <mat-option [value]="p.id">{{ name(p) }}</mat-option>
@@ -35,29 +35,29 @@ export interface RoundEditorData {
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline">
-            <mat-label>Week</mat-label>
+            <mat-label>Tjedan</mat-label>
             <mat-select [ngModel]="week()" (ngModelChange)="setWeek($event)" name="week">
               @for (w of weeks; track w) {
-                <mat-option [value]="w">Week {{ w }}</mat-option>
+                <mat-option [value]="w">Tjedan {{ w }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline">
-            <mat-label>Round</mat-label>
+            <mat-label>Runda</mat-label>
             <mat-select [ngModel]="slot()" (ngModelChange)="setSlot($event)" name="slot">
-              <mat-option value="first">First round</mat-option>
-              <mat-option value="advance">First round, played in advance</mat-option>
-              <mat-option value="repeat">Repeat (replaces first round)</mat-option>
+              <mat-option value="first">Prva runda</mat-option>
+              <mat-option value="advance">Prva runda, odigrana unaprijed</mat-option>
+              <mat-option value="repeat">Ponovljena (zamjenjuje prvu rundu)</mat-option>
             </mat-select>
           </mat-form-field>
         </div>
         @if (existing()) {
-          <p class="warn">This player already has this round for week {{ week() }}. Saving replaces it.</p>
+          <p class="warn">Ovaj igrač već ima tu rundu za {{ week() }}. tjedan. Spremanje će je zamijeniti.</p>
         }
       } @else {
         <p class="who">
-          <strong>{{ data.round!.playerName }}</strong> · week {{ data.round!.week }} ·
-          {{ data.round!.attempt === 2 ? 'repeat' : data.round!.type === 'advance' ? 'in advance' : 'first round' }}
+          <strong>{{ data.round!.playerName }}</strong> · tjedan {{ data.round!.week }} ·
+          {{ data.round!.attempt === 2 ? 'ponovljena' : data.round!.type === 'advance' ? 'unaprijed' : 'prva runda' }}
         </p>
       }
 
@@ -73,13 +73,13 @@ export interface RoundEditorData {
               [ngModel]="h.strokes"
               (ngModelChange)="setStrokes(i, $event)"
               [name]="'h' + i"
-              [attr.aria-label]="'Strokes on hole ' + h.number"
+              [attr.aria-label]="'Bacanja na košu ' + h.number"
             />
           </label>
         }
       </div>
       <p class="total">
-        Total {{ totals().strokes }} ·
+        Ukupno {{ totals().strokes }} ·
         <strong>{{ totals().toPar | toPar }}</strong>
       </p>
       @if (error()) {
@@ -87,8 +87,8 @@ export interface RoundEditorData {
       }
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button (click)="save()" [disabled]="saving() || !valid()">Save</button>
+      <button mat-button mat-dialog-close>Odustani</button>
+      <button mat-flat-button (click)="save()" [disabled]="saving() || !valid()">Spremi</button>
     </mat-dialog-actions>
   `,
   styles: `
@@ -97,16 +97,22 @@ export interface RoundEditorData {
     .warn { margin: 0 0 12px; color: var(--mat-sys-tertiary); }
     .who { margin-top: 0; }
     .holes { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
-    .hole { display: flex; flex-direction: column; padding: 6px; border-radius: 10px; background: var(--score-bg, var(--mat-sys-surface-container-high)); color: var(--score-fg, inherit); }
+    .hole {
+      display: flex; flex-direction: column; padding: 8px; border-radius: 14px;
+      background: var(--score-bg, color-mix(in srgb, var(--mat-sys-surface-container-highest) 70%, transparent));
+      color: var(--score-fg, inherit); transition: background-color 300ms, color 300ms;
+    }
     .hn { font: var(--mat-sys-label-medium); }
     .hn small { opacity: 0.7; }
     .hole input {
       width: 100%; box-sizing: border-box; margin-top: 4px; padding: 4px;
       font: var(--mat-sys-title-medium); text-align: center;
-      border: 1px solid var(--mat-sys-outline-variant); border-radius: 6px;
+      font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+      border: 1px solid var(--glass-border-strong); border-radius: 10px;
       background: var(--mat-sys-surface); color: var(--mat-sys-on-surface);
     }
-    .total { margin: 14px 0 0; font: var(--mat-sys-title-medium); }
+    .total { margin: 16px 0 0; font: var(--mat-sys-title-medium); }
+    .total strong { font: 700 20px / 1 'Space Grotesk', sans-serif; }
   `,
 })
 export class RoundEditor {

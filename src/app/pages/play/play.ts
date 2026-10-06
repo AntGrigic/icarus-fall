@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router, RouterLink } from '@angular/router';
 
 import { newId } from '../../core/ids';
@@ -19,7 +18,7 @@ import { Player } from '../../core/models';
 import { DataStore } from '../../data/data-store';
 import { CardService } from '../../play/card.service';
 import { Confirm } from '../../shared/confirm';
-import { formatDay, formatRange } from '../../shared/format';
+import { formatDay, formatRange, plural } from '../../shared/format';
 import { PlayerPicker } from '../../shared/player-picker';
 
 interface Draft {
@@ -30,7 +29,7 @@ interface Draft {
 /** Set up a card: who is in the flight and which round each of them is playing. */
 @Component({
   selector: 'app-play',
-  imports: [RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule, PlayerPicker],
+  imports: [RouterLink, MatButtonModule, MatIconModule, PlayerPicker],
   templateUrl: './play.html',
   styleUrl: './play.scss',
 })
@@ -45,13 +44,14 @@ export class PlayPage {
   protected readonly drafts = signal<Draft[]>([]);
   protected readonly name = fullName;
   protected readonly sameSlot = sameSlot;
+  protected readonly plural = plural;
 
   protected readonly weekText = computed(() => {
     const league = this.league();
     const week = this.week();
     if (!league || !week) return '';
     const holes = playableHoles(league, week.week).length;
-    return `Week ${week.week} · ${formatRange(weekRange(league, week.week))} · ${holes} holes`;
+    return `Tjedan ${week.week} · ${formatRange(weekRange(league, week.week))} · ${holes} ${plural(holes, 'koš', 'koša', 'koševa')}`;
   });
 
   protected readonly startsOn = computed(() => {
@@ -73,7 +73,7 @@ export class PlayPage {
 
   /** Used by the picker to grey out players with nothing left to play this week. */
   protected readonly unavailable = (p: Player): string | null =>
-    this.optionsFor(p).length ? null : 'nothing left to play this week';
+    this.optionsFor(p).length ? null : 'ovaj tjedan nema više rundi za igranje';
 
   protected optionsFor(player: Player): RoundOption[] {
     const league = this.league();
@@ -109,9 +109,9 @@ export class PlayPage {
     if (
       this.cards.card() &&
       !(await this.confirm.ask({
-        title: 'Start a new round?',
-        message: 'The round that is already in progress on this phone will be discarded.',
-        confirmText: 'Start new round',
+        title: 'Započeti novu rundu?',
+        message: 'Runda koja je u tijeku na ovom mobitelu bit će odbačena.',
+        confirmText: 'Započni novu rundu',
         danger: true,
       }))
     ) {
@@ -130,6 +130,7 @@ export class PlayPage {
         division: d.player.division,
         option: d.option!,
       })),
+      startOrder: shuffle(this.drafts().map((d) => d.player.id)),
       scores: Object.fromEntries(this.drafts().map((d) => [d.player.id, holes.map(() => null)])),
       holeIndex: 0,
     });
@@ -139,11 +140,21 @@ export class PlayPage {
 
   protected async discard(): Promise<void> {
     const ok = await this.confirm.ask({
-      title: 'Discard round?',
-      message: 'The scores entered on this card will be lost.',
-      confirmText: 'Discard',
+      title: 'Odbaciti rundu?',
+      message: 'Rezultati upisani na ovaj scorecard bit će izgubljeni.',
+      confirmText: 'Odbaci',
       danger: true,
     });
     if (ok) this.cards.discard();
   }
+}
+
+/** Fisher–Yates: every order is equally likely. */
+function shuffle<T>(items: T[]): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
 }
