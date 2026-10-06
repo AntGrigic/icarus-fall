@@ -61,15 +61,15 @@ import { formatRange } from '../../shared/format';
     .weeks { display: flex; flex-direction: column; gap: 10px; padding-top: 16px; }
     .help { margin: 0 0 6px; font: var(--mat-sys-body-small); }
     .week.current { border-color: color-mix(in srgb, var(--mat-sys-primary) 50%, transparent); }
-    .now { background: var(--brand-grad); color: var(--on-brand); border: 0; }
+    .now { background: var(--brand); color: var(--on-brand); border: 0; }
     .week-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .spacer { flex: 1; }
     .closed-text { color: var(--mat-sys-error); font: var(--mat-sys-label-large); }
     .holes { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 6px; }
     .hole {
       display: flex; align-items: center; justify-content: center; gap: 2px;
-      height: 40px; border-radius: 12px; cursor: pointer; font: var(--mat-sys-label-large);
-      border: 1px solid var(--glass-border-strong);
+      height: 40px; border-radius: var(--radius-sm); cursor: pointer; font: 600 15px / 1 var(--font-text);
+      border: 1px solid var(--rule-strong);
       background: color-mix(in srgb, var(--mat-sys-surface) 55%, transparent); color: var(--mat-sys-on-surface);
       transition: background-color 200ms, color 200ms;
     }

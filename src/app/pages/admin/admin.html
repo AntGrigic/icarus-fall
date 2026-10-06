@@ -1,8 +1,8 @@
 <div class="page">
   @if (!store.ready()) {
-    <div class="loading"><span class="orbit-loader" role="progressbar" aria-label="Učitavanje"></span></div>
+    <div class="loading"><span class="coin-loader" role="progressbar" aria-label="Učitavanje"></span></div>
   } @else if (!store.isAdmin()) {
-    <section class="login panel">
+    <section class="login panel framed">
       <img class="login-logo" src="logo.png" alt="" width="72" height="72" />
       <h1>Prijava za admina</h1>
       <p class="muted">Igrači ne trebaju račun. Ovo je samo za onoga tko vodi ligu.</p>

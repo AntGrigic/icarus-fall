@@ -41,9 +41,9 @@ export const appConfig: ApplicationConfig = {
       // Pages glide in and out (animations in styles.scss); browsers without support just swap.
       withViewTransitions({ skipInitialTransition: true }),
     ),
-    // Rounded icon font (loaded in index.html) instead of the default sharp one.
+    // Sharp icon font (loaded in index.html): square corners suit the carved-stone look.
     provideAppInitializer(() => {
-      inject(MatIconRegistry).setDefaultFontSetClass('material-icons-round', 'mat-ligature-font');
+      inject(MatIconRegistry).setDefaultFontSetClass('material-icons-sharp', 'mat-ligature-font');
     }),
     { provide: TitleStrategy, useClass: AppTitleStrategy },
     provideServiceWorker('ngsw-worker.js', {

@@ -2,7 +2,7 @@ import { Component, computed, input, model } from '@angular/core';
 
 import { Division, DIVISIONS } from '../core/models';
 
-/** Muškarci / Žene switch: a pill track with a highlight that slides to the selected division. */
+/** Muškarci / Žene switch: a framed track with a plaque that slides to the selected division. */
 @Component({
   selector: 'app-division-switch',
   host: {
@@ -37,24 +37,23 @@ import { Division, DIVISIONS } from '../core/models';
       width: 100%;
       max-width: 360px;
       box-sizing: border-box;
-      padding: 5px;
-      border-radius: 999px;
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      box-shadow: inset 0 1px 0 var(--glass-shine);
-      backdrop-filter: blur(14px);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      background: var(--panel);
+      border: 1px solid var(--rule-strong);
     }
 
+    /* The inlaid plaque that slides to the chosen division. */
     :host::before {
       content: '';
       position: absolute;
-      top: 5px;
-      bottom: 5px;
-      left: 5px;
-      width: calc((100% - 10px) / var(--count));
-      border-radius: 999px;
-      background: var(--brand-grad);
-      box-shadow: 0 8px 20px -8px var(--glow), inset 0 1px 0 rgb(255 255 255 / 0.3);
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      width: calc((100% - 8px) / var(--count));
+      border-radius: 3px;
+      background: var(--brand);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 65%, transparent);
       transform: translateX(calc(var(--active) * 100%));
       transition: transform 350ms var(--ease-out);
     }
@@ -68,10 +67,10 @@ import { Division, DIVISIONS } from '../core/models';
       height: 40px;
       padding: 0 16px;
       border: 0;
-      border-radius: 999px;
+      border-radius: 3px;
       background: transparent;
       color: var(--mat-sys-on-surface-variant);
-      font: var(--mat-sys-label-large);
+      font: 600 16px / 1 var(--font-text);
       cursor: pointer;
       transition: color 200ms;
     }
@@ -92,9 +91,10 @@ import { Division, DIVISIONS } from '../core/models';
     .count {
       min-width: 22px;
       box-sizing: border-box;
-      padding: 1px 7px;
-      border-radius: 999px;
+      padding: 2px 6px;
+      border-radius: 3px;
       font: var(--mat-sys-label-small);
+      font-weight: 600;
       font-variant-numeric: tabular-nums;
       background: color-mix(in srgb, currentColor 16%, transparent);
     }

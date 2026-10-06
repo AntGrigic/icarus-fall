@@ -1,6 +1,6 @@
 <div class="page narrow">
   @if (!store.ready() || (league() && !store.activeRounds())) {
-    <div class="loading"><span class="orbit-loader" role="progressbar" aria-label="Učitavanje"></span></div>
+    <div class="loading"><span class="coin-loader" role="progressbar" aria-label="Učitavanje"></span></div>
   } @else if (!league()) {
     <div class="empty-state">
       <mat-icon>emoji_events</mat-icon>
@@ -9,7 +9,7 @@
     </div>
   } @else {
     @if (cards.card(); as card) {
-      <section class="resume panel">
+      <section class="resume panel framed">
         <div class="resume-icon"><mat-icon>sports</mat-icon></div>
         <div class="resume-text">
           <h2>Runda u tijeku</h2>

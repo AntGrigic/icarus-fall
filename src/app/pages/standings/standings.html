@@ -1,6 +1,6 @@
 <div class="page">
   @if (!store.ready()) {
-    <div class="loading"><span class="orbit-loader" role="progressbar" aria-label="Učitavanje"></span></div>
+    <div class="loading"><span class="coin-loader" role="progressbar" aria-label="Učitavanje"></span></div>
   } @else if (!league()) {
     <div class="empty-state">
       <mat-icon>emoji_events</mat-icon>
@@ -39,7 +39,8 @@
       <ol class="season" aria-label="Tjedni sezone">
         @for (w of season(); track w.week) {
           <li [class]="w.state" [title]="'Tjedan ' + w.week">
-            <span>{{ w.week }}</span>
+            <span aria-hidden="true">{{ roman(w.week) }}</span>
+            <span class="sr-only">Tjedan {{ w.week }}</span>
           </li>
         }
       </ol>
@@ -63,7 +64,7 @@
     />
 
     @if (!standings()) {
-      <div class="loading"><span class="orbit-loader" role="progressbar" aria-label="Učitavanje"></span></div>
+      <div class="loading"><span class="coin-loader" role="progressbar" aria-label="Učitavanje"></span></div>
     } @else if (!standings()!.rows.length) {
       <div class="empty-state">
         <mat-icon>sports</mat-icon>
@@ -82,7 +83,9 @@
               <th class="total">Ukupno</th>
               <th class="wks" title="Tjedni koji se broje">Tj.</th>
               @for (w of weeks(); track w) {
-                <th class="wk" [class.current]="w === s.info.week && s.info.status === 'running'">{{ w }}</th>
+                <th class="wk" [class.current]="w === s.info.week && s.info.status === 'running'" [title]="'Tjedan ' + w">
+                  <span aria-hidden="true">{{ roman(w) }}</span><span class="sr-only">Tjedan {{ w }}</span>
+                </th>
               }
             </tr>
           </thead>

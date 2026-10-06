@@ -1,19 +1,56 @@
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:string';
 @use '@angular/material' as mat;
 @use './theme-colors' as theme;
-@use './sky';
+@use './backdrop';
 
 /*
- * Jupiter shades
- * Light: sunlit cloud tops (cream zones, ochre belts). Dark: deep space around the planet.
- * Brand colours come from Jupiter's bands: cream, sand, amber, rust and the Great Red Spot.
- * Under par is "cool" (aurora teal / Europa ice), over par is "hot" (ochre / red spot).
+ * Jupiter shades, after Iuppiter Optimus Maximus of the Capitol.
+ * Light: a temple by day (pale stone, ink, Tyrian purple, gold leaf). Dark: the temple at night.
+ * Roman capitals (Cinzel) are kept for headings and Roman numerals; everything that has to be read
+ * quickly (text, names, buttons, scores) is in Source Serif, a sturdy serif made for screens.
+ * Under par wins the laurel (green; an eagle is the legion's gold), over par is Pompeian red.
  */
+
+$display: ('Cinzel', 'Trajan Pro', 'Times New Roman', serif);
+// Quotes inside the string: Sass drops plain ones, and an unquoted family ending in 4 is invalid CSS.
+$text: ("'Source Serif 4'", Georgia, serif);
+
+// A serif reads best a little larger than Material's sans-serif defaults.
+$type-sizes: (
+  body-large: (17px, 26px),
+  body-medium: (16px, 24px),
+  body-small: (14px, 20px),
+  label-large: (15px, 20px),
+  label-medium: (14px, 18px),
+  label-small: (13px, 16px),
+);
+
+@function type-overrides() {
+  $overrides: ();
+  @each $name, $size in $type-sizes {
+    $weight: 400;
+    @if string.index($name, 'label') {
+      $weight: 600;
+    }
+    $font-size: list.nth($size, 1);
+    $line-height: list.nth($size, 2);
+    $overrides: map.merge($overrides, (
+      $name: #{$weight} #{$font-size}#{'/'}#{$line-height} #{$text},
+      #{$name}-size: $font-size,
+      #{$name}-line-height: $line-height,
+      #{$name}-tracking: 0,
+    ));
+  }
+  @return $overrides;
+}
 
 html {
   height: 100%;
   color-scheme: light dark; // follow the phone's light/dark setting
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--mat-sys-primary) 45%, transparent) transparent;
+  scrollbar-color: color-mix(in srgb, var(--gold) 55%, transparent) transparent;
 
   @include mat.theme((
     color: (
@@ -21,8 +58,8 @@ html {
       tertiary: theme.$tertiary-palette,
     ),
     typography: (
-      plain-family: (Inter, system-ui, sans-serif),
-      brand-family: ('Space Grotesk', Inter, system-ui, sans-serif),
+      plain-family: $text,
+      brand-family: $text, // Cinzel is applied by hand, only where it stays readable
       bold-weight: 700,
       medium-weight: 600,
       regular-weight: 400,
@@ -30,117 +67,150 @@ html {
     density: 0,
   ));
 
-  // Surfaces: warm cream by day, indigo space by night.
+  @include mat.theme-overrides(type-overrides());
+
+  // Pale stone by day, dark stone by night. Primary is Tyrian purple by day and gold leaf by night.
   @include mat.theme-overrides((
-    surface: light-dark(#fbf4ea, #0d0b16),
-    surface-dim: light-dark(#eadccb, #0d0b16),
-    surface-bright: light-dark(#fffaf3, #2c2739),
-    surface-container-lowest: light-dark(#ffffff, #08070f),
-    surface-container-low: light-dark(#f8eee1, #14111e),
-    surface-container: light-dark(#f3e7d8, #1a1625),
-    surface-container-high: light-dark(#ede0cf, #231f2f),
-    surface-container-highest: light-dark(#e6d7c4, #2e2939),
-    on-surface: light-dark(#241a12, #f4eadf),
-    on-surface-variant: light-dark(#5e5046, #c9bcb1),
-    outline: light-dark(#8d7d70, #8c8193),
-    outline-variant: light-dark(#e0cfbd, #383243),
-    primary: light-dark(#97500f, #ffb86d),
-    on-primary: light-dark(#ffffff, #2c1600),
-    primary-container: light-dark(#ffdcbd, #4f2f0b),
-    on-primary-container: light-dark(#3a1f00, #ffdcbd),
+    surface: light-dark(#f3eee6, #161214),
+    surface-dim: light-dark(#e3ddd2, #161214),
+    surface-bright: light-dark(#fdfbf7, #342c31),
+    surface-container-lowest: light-dark(#ffffff, #0f0c0e),
+    surface-container-low: light-dark(#f8f4ee, #1c1719),
+    surface-container: light-dark(#f1ebe2, #221c20),
+    surface-container-high: light-dark(#ebe4d9, #2b2429),
+    surface-container-highest: light-dark(#e4dccf, #362e33),
+    on-surface: light-dark(#241c15, #f3eadb),
+    on-surface-variant: light-dark(#594c3f, #cfc3b2),
+    outline: light-dark(#8a7b68, #908272),
+    outline-variant: light-dark(#dbd0c0, #3f363b),
+    primary: light-dark(#5e2650, #dcbb72),
+    on-primary: light-dark(#f7e9c6, #2b1724),
+    primary-container: light-dark(#ebdde3, #4a1d3e),
+    on-primary-container: light-dark(#3b0b30, #f5dcea),
+    secondary-container: light-dark(#efe1bf, #3d3018),
+    on-secondary-container: light-dark(#4a3608, #f0dcae),
+    tertiary: light-dark(#9a2f1d, #f0a08c),
+    tertiary-container: light-dark(#f6d9cf, #4f1b12),
+    on-tertiary-container: light-dark(#4a0d03, #ffdad1),
   ));
 
   @include mat.button-overrides((
-    filled-container-color: light-dark(#a8501a, #ffb470),
-    filled-label-text-color: light-dark(#ffffff, #2a1400),
-    filled-container-height: 44px,
-    filled-horizontal-padding: 22px,
-    outlined-container-height: 44px,
-    outlined-outline-color: var(--glass-border-strong),
+    filled-container-color: var(--brand),
+    filled-label-text-color: var(--on-brand),
+    filled-container-shape: var(--radius-sm),
+    filled-container-height: 46px,
+    filled-horizontal-padding: 24px,
+    filled-label-text-font: $text,
+    filled-label-text-size: 16px,
+    filled-label-text-weight: 600,
+    filled-label-text-tracking: 0,
+    outlined-container-shape: var(--radius-sm),
+    outlined-container-height: 46px,
+    outlined-outline-color: var(--gold),
     outlined-label-text-color: var(--mat-sys-on-surface),
+    outlined-label-text-font: $text,
+    outlined-label-text-size: 16px,
+    outlined-label-text-weight: 600,
+    outlined-label-text-tracking: 0,
+    text-container-shape: var(--radius-sm),
     text-label-text-color: var(--mat-sys-primary),
+    text-label-text-font: $text,
+    text-label-text-size: 16px,
+    text-label-text-weight: 600,
+    text-label-text-tracking: 0,
+  ));
+  @include mat.icon-button-overrides((
+    container-shape: var(--radius-sm),
   ));
   @include mat.form-field-overrides((
-    outlined-container-shape: 14px,
-    outlined-outline-color: var(--glass-border-strong),
+    outlined-container-shape: var(--radius-sm),
+    outlined-outline-color: var(--rule-strong),
   ));
   @include mat.select-overrides((
-    panel-background-color: var(--glass-strong),
+    panel-background-color: var(--panel-strong),
   ));
   @include mat.autocomplete-overrides((
-    background-color: var(--glass-strong),
-    container-shape: 18px,
+    background-color: var(--panel-strong),
+    container-shape: var(--radius-sm),
   ));
   @include mat.menu-overrides((
-    container-color: var(--glass-strong),
-    container-shape: 18px,
+    container-color: var(--panel-strong),
+    container-shape: var(--radius-sm),
   ));
   @include mat.dialog-overrides((
-    container-color: var(--glass-strong),
-    container-shape: 28px,
+    container-color: var(--panel-strong),
+    container-shape: var(--radius),
+    subhead-font: $display,
+    subhead-weight: 600,
+    subhead-tracking: 0.02em,
   ));
   @include mat.snack-bar-overrides((
-    container-color: light-dark(#2a1f18, #f4eadf),
-    supporting-text-color: light-dark(#f4eadf, #241a12),
-    button-color: light-dark(#ffb86d, #97500f),
-    container-shape: 16px,
+    container-color: light-dark(#2a1d26, #f0e5d1),
+    supporting-text-color: light-dark(#f0e5d1, #2a1d26),
+    button-color: light-dark(#dcbb72, #5e2650),
+    container-shape: var(--radius-sm),
   ));
+  // Tabs are underlined in gold, like a heading in a ledger.
   @include mat.tabs-overrides((
-    active-indicator-height: 0,
-    active-indicator-shape: 999px,
-    active-label-text-color: var(--on-brand),
-    active-hover-label-text-color: var(--on-brand),
-    active-focus-label-text-color: var(--on-brand),
+    active-indicator-color: var(--gold),
+    active-focus-indicator-color: var(--gold),
+    active-hover-indicator-color: var(--gold),
+    active-indicator-height: 2px,
+    active-label-text-color: var(--mat-sys-on-surface),
+    active-hover-label-text-color: var(--mat-sys-on-surface),
+    active-focus-label-text-color: var(--mat-sys-on-surface),
     inactive-label-text-color: var(--mat-sys-on-surface-variant),
-    divider-color: var(--glass-border),
-    container-height: 56px,
+    divider-color: var(--rule),
+    container-height: 52px,
+    label-text-font: $text,
+    label-text-size: 16px,
+    label-text-weight: 600,
+    label-text-tracking: 0,
   ));
 }
 
 :root {
   --page-max: 1080px;
   --gutter: 16px;
-  --radius: 22px;
-  --radius-sm: 14px;
+  --radius: 6px;
+  --radius-sm: 4px;
 
-  /* Jupiter */
-  --jx-cream: #f6e7cf;
-  --jx-sand: #e3c194;
-  --jx-amber: #e39a45;
-  --jx-rust: #b4532c;
-  --jx-spot: #d0492e;
-  --jx-belt: #6b4632;
+  // Roman capitals for headings and Roman numerals only; the text face for everything else,
+  // including numbers (in Cinzel a small 11 reads like the numeral II).
+  --font-display: #{$display};
+  --font-text: #{$text};
 
-  --sky: light-dark(#f7ede0, #0b0913);
-  --brand-grad: linear-gradient(
-    120deg,
-    light-dark(#b0600f, #ffc47e) 0%,
-    light-dark(#a8441c, #ff9e66) 55%,
-    light-dark(#93301b, #ff806c) 100%
-  );
-  --on-brand: light-dark(#ffffff, #2a1400);
+  /* Gold leaf: lines and ornaments (--gold), lettering that has to be read (--gold-ink). */
+  --gold: light-dark(#a8873f, #c9a75e);
+  --gold-ink: light-dark(#7a5a1c, #e2c27c);
 
-  --glass: light-dark(rgb(255 251 245 / 0.7), rgb(28 23 40 / 0.58));
-  --glass-strong: light-dark(rgb(255 250 243 / 0.92), rgb(24 20 35 / 0.9));
-  --glass-solid: light-dark(#fffaf3, #17131f);
-  --glass-border: light-dark(rgb(120 72 30 / 0.13), rgb(255 228 196 / 0.09));
-  --glass-border-strong: light-dark(rgb(120 72 30 / 0.28), rgb(255 228 196 / 0.2));
-  --glass-shine: light-dark(rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.07));
-  --shadow-1: 0 1px 2px light-dark(rgb(90 50 10 / 0.06), rgb(0 0 0 / 0.3)),
-    0 12px 32px -14px light-dark(rgb(120 70 20 / 0.28), rgb(0 0 0 / 0.65));
-  --glow: light-dark(rgb(196 100 26 / 0.32), rgb(255 160 80 / 0.38));
+  /* Filled things: buttons, the active nav plaque, the par tablet. Tyrian purple by day, gold by night. */
+  --brand: light-dark(#5e2650, #d4b26a);
+  --on-brand: light-dark(#f7e9c6, #2b1724);
 
-  --under: light-dark(#0b7564, #6fe3c9);
-  --over: light-dark(#b0381c, #ff9a7f);
+  --sky: light-dark(#efe9df, #161214);
+  --panel: light-dark(#fbf8f3, #211b1f);
+  --panel-strong: light-dark(#fefcf9, #282126);
+  --rule: light-dark(rgb(122 92 40 / 0.2), rgb(220 187 114 / 0.14));
+  --rule-strong: light-dark(rgb(122 92 40 / 0.4), rgb(220 187 114 / 0.3));
+  --shadow-1: 0 1px 2px light-dark(rgb(70 45 10 / 0.08), rgb(0 0 0 / 0.4)),
+    0 8px 20px -14px light-dark(rgb(70 45 10 / 0.35), rgb(0 0 0 / 0.8));
 
-  --score-eagle: light-dark(#3a3ea6, #c5c8ff);
-  --score-eagle-bg: light-dark(#e1e2ff, #2b2c5e);
-  --score-birdie: light-dark(#0b6657, #82ead3);
-  --score-birdie-bg: light-dark(#d0f3eb, #10393a);
-  --score-bogey: light-dark(#8a5000, #ffcc80);
-  --score-bogey-bg: light-dark(#ffe5c0, #432c10);
-  --score-double: light-dark(#a3260f, #ffa38c);
-  --score-double-bg: light-dark(#ffdad2, #521c15);
+  /* Greek key border, used as a mask so it takes the gold of whatever draws it. */
+  --meander: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='14' viewBox='0 0 16 14'%3E%3Cpath d='M0 13H2V1H14V9H10V5H6V13H16' fill='none' stroke='%23000' stroke-width='1.4'/%3E%3C/svg%3E");
+
+  --under: light-dark(#3b6a22, #a9d07c);
+  --over: light-dark(#a02c1b, #f2937d);
+
+  /* Eagle: the legion's gold aquila. Birdie: laurel. Bogey: terracotta. Double: Pompeian red. */
+  --score-eagle: light-dark(#5e4300, #f4d77f);
+  --score-eagle-bg: light-dark(#f1dd9c, #463712);
+  --score-birdie: light-dark(#2f5419, #bcdc96);
+  --score-birdie-bg: light-dark(#d9e7c6, #24331a);
+  --score-bogey: light-dark(#86411f, #f3be98);
+  --score-bogey-bg: light-dark(#f3dccb, #402616);
+  --score-double: light-dark(#7d1b10, #ffab98);
+  --score-double-bg: light-dark(#ecc0b6, #541d16);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -149,6 +219,7 @@ body {
   background-color: var(--sky);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
+  font-variant-numeric: lining-nums;
   margin: 0;
   min-height: 100%;
   -webkit-tap-highlight-color: transparent;
@@ -156,7 +227,7 @@ body {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--jx-amber) 40%, transparent);
+  background: color-mix(in srgb, var(--gold) 40%, transparent);
 }
 
 :focus-visible {
@@ -168,22 +239,23 @@ h1,
 h2,
 h3 {
   margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 h1 {
-  font: var(--mat-sys-headline-medium);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: 28px;
+  line-height: 1.2;
 }
 
 h2 {
-  font: var(--mat-sys-title-large);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 20px;
+  line-height: 1.3;
 }
 
 h3 {
-  font: var(--mat-sys-title-medium);
+  font-size: 17px;
 }
 
 a {
@@ -199,20 +271,20 @@ code {
   align-items: center;
   gap: 8px;
   margin-bottom: 6px;
-  font: var(--mat-sys-label-medium);
-  letter-spacing: 0.14em;
+  font: 600 13px / 1.3 var(--font-display);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--mat-sys-primary);
+  color: var(--gold-ink);
 }
 
+/* A small lozenge, like the stops carved between words on a monument. */
 .live-dot {
   position: relative;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   flex: none;
-  border-radius: 50%;
+  rotate: 45deg;
   background: var(--under);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--under) 70%, transparent);
 }
 
 .muted {
@@ -253,7 +325,7 @@ code {
 .page {
   max-width: var(--page-max);
   margin: 0 auto;
-  padding: 24px var(--gutter) 40px;
+  padding: 28px var(--gutter) 40px;
   box-sizing: border-box;
 }
 
@@ -266,16 +338,30 @@ code {
   margin-bottom: 20px;
 }
 
-/* Frosted glass card. */
+/* A marble slab. */
 .panel {
   position: relative;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
+  background: var(--panel);
+  border: 1px solid var(--rule);
   border-radius: var(--radius);
   padding: 18px;
-  box-shadow: var(--shadow-1), inset 0 1px 0 var(--glass-shine);
-  backdrop-filter: blur(18px) saturate(150%);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: var(--shadow-1);
+}
+
+/* A slab with a second rule inside the gold one: a framed tablet, for the things that matter most. */
+.panel.framed {
+  border-color: var(--gold);
+  box-shadow:
+    inset 0 0 0 3px var(--panel),
+    inset 0 0 0 4px var(--rule-strong),
+    var(--shadow-1);
+}
+
+/* Laurel wreath ornament, drawn in the current text colour. */
+.laurel {
+  display: block;
+  background-color: currentColor;
+  mask: url('./ornaments/laurel.svg') center / contain no-repeat;
 }
 
 .notice {
@@ -284,22 +370,19 @@ code {
   align-items: center;
   gap: 12px;
   padding: 12px 16px 12px 20px;
-  border-radius: 16px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--mat-sys-tertiary) 16%, transparent), transparent 80%),
-    var(--glass);
+  background: color-mix(in srgb, var(--mat-sys-tertiary) 7%, var(--panel));
   color: var(--mat-sys-on-surface);
   border: 1px solid color-mix(in srgb, var(--mat-sys-tertiary) 30%, transparent);
   margin-bottom: 16px;
-  backdrop-filter: blur(12px);
 
   &::before {
     content: '';
     position: absolute;
     inset: 0 auto 0 0;
     width: 4px;
-    background: var(--brand-grad);
+    background: var(--mat-sys-tertiary);
   }
 
   mat-icon {
@@ -312,6 +395,7 @@ code {
   color: var(--mat-sys-error);
 }
 
+/* The icon sits in a round medallion with a gold rim. */
 .empty-state {
   text-align: center;
   padding: 56px 16px;
@@ -319,20 +403,23 @@ code {
 
   > mat-icon {
     box-sizing: content-box;
-    font-size: 36px;
-    width: 36px;
-    height: 36px;
+    font-size: 34px;
+    width: 34px;
+    height: 34px;
     padding: 18px;
     border-radius: 50%;
-    color: var(--mat-sys-primary);
-    background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+    color: var(--gold-ink);
+    background: var(--panel);
+    border: 1px solid var(--gold);
+    box-shadow:
+      0 0 0 4px var(--panel),
+      0 0 0 5px var(--rule-strong);
   }
 
   h2 {
-    margin: 18px 0 6px;
+    margin: 22px 0 6px;
     color: var(--mat-sys-on-surface);
-    font: var(--mat-sys-headline-small);
-    font-weight: 700;
+    font-size: 22px;
   }
 
   p {
@@ -344,14 +431,23 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 10px;
-  border-radius: 999px;
+  padding: 2px 9px;
+  border-radius: var(--radius-sm);
   font: var(--mat-sys-label-small);
   font-weight: 600;
-  letter-spacing: 0.02em;
-  background: color-mix(in srgb, var(--mat-sys-secondary-container) 75%, transparent);
+  background: var(--mat-sys-secondary-container);
   color: var(--mat-sys-on-secondary-container);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--rule);
+  white-space: nowrap;
+}
+
+/* Read out by screen readers, not shown (e.g. "Tjedan 4" next to a visible "IV"). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
@@ -365,57 +461,33 @@ code {
   padding: 72px 0;
 }
 
-/* Loading indicator: a tiny banded Jupiter with a moon in orbit. */
-.orbit-loader {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-
-  &::before {
-    content: '';
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: linear-gradient(
-      180deg,
-      #f6e7cf 0 16%,
-      #d9924a 16% 30%,
-      #f1d9b5 30% 46%,
-      #b4532c 46% 58%,
-      #e8c08d 58% 76%,
-      #8a5a3c 76%
-    );
-    box-shadow: inset -6px -5px 10px rgb(0 0 0 / 0.45), 0 0 22px var(--glow);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 1px solid color-mix(in srgb, var(--mat-sys-primary) 28%, transparent);
-    background: radial-gradient(circle at 50% 4px, var(--mat-sys-primary) 0 4px, transparent 5px);
-    animation: spin 1.3s linear infinite;
-  }
+/* Loading indicator: a gold coin turning over. */
+.coin-loader {
+  display: block;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f6e2a4, #d2ab55 45%, #8c6a26 100%);
+  box-shadow:
+    inset 0 0 0 3px rgb(120 86 20 / 0.55),
+    inset 0 0 0 5px rgb(255 240 200 / 0.35);
+  animation: coin-turn 1.6s ease-in-out infinite;
 }
 
-/* Angular Material, Jupiter style */
+/* Angular Material, Roman style */
 
+// A thin gold inlay around filled buttons.
 .mat-mdc-unelevated-button:not(:disabled):not(.danger) {
-  background-image: var(--brand-grad);
-  box-shadow: 0 8px 22px -10px var(--glow);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 70%, transparent);
   transition: transform 200ms ease;
 
   &:active {
-    transform: scale(0.97);
+    transform: scale(0.98);
   }
 }
 
 .mat-mdc-outlined-button:not(:disabled) {
-  background: var(--glass);
-  backdrop-filter: blur(10px);
+  background: var(--panel);
 }
 
 .mat-mdc-select-panel,
@@ -423,31 +495,15 @@ code {
 .mat-mdc-menu-panel,
 .mat-mdc-dialog-surface,
 .mat-mdc-snackbar-surface {
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--rule-strong);
 }
 
 .mat-mdc-dialog-surface {
-  box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.55) !important;
+  box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.5) !important;
 }
 
 .cdk-overlay-dark-backdrop.cdk-overlay-backdrop-showing {
-  background: light-dark(rgb(60 30 10 / 0.3), rgb(4 2 10 / 0.6));
-  backdrop-filter: blur(6px);
-}
-
-/* Tabs: the active tab is a gradient pill that slides between tabs (Material animates the indicator). */
-.mat-mdc-tab .mdc-tab-indicator {
-  top: 8px;
-  left: 2px;
-  width: calc(100% - 4px);
-  height: calc(100% - 16px);
-}
-
-.mat-mdc-tab .mdc-tab-indicator__content--underline {
-  align-self: stretch;
-  background: var(--brand-grad);
+  background: light-dark(rgb(50 30 10 / 0.35), rgb(4 2 6 / 0.65));
 }
 
 /* Shared motion */
@@ -462,11 +518,11 @@ code {
 @keyframes pop {
   0% {
     opacity: 0;
-    transform: scale(0.5);
+    transform: scale(0.6);
   }
   60% {
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(1.05);
   }
 }
 
@@ -476,9 +532,12 @@ code {
   }
 }
 
-@keyframes spin {
+@keyframes coin-turn {
+  50% {
+    transform: rotateY(180deg);
+  }
   to {
-    transform: rotate(1turn);
+    transform: rotateY(360deg);
   }
 }
 
@@ -527,6 +586,12 @@ code {
   to {
     opacity: 0;
   }
+}
+
+/* Set for a moment while the light/dark theme changes (ThemeService), so everything swaps at once. */
+.theme-switching,
+.theme-switching * {
+  transition: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
