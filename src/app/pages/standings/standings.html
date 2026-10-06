@@ -49,10 +49,7 @@
     @if (closedHoles().length) {
       <div class="notice">
         <mat-icon>warning_amber</mat-icon>
-        <span>
-          {{ closedHoles().length > 1 ? 'Koševi' : 'Koš' }} {{ closedHoles().join(', ') }}
-          {{ closedHoles().length > 1 ? 'su zatvoreni' : 'je zatvoren' }} ovaj tjedan.
-        </span>
+        <span>{{ closedNotice() }}</span>
       </div>
     }
 
@@ -124,7 +121,7 @@
                       @if (cell.replaced) {
                         <sup>P</sup>
                       } @else if (cell.round.type === 'advance') {
-                        <sup>U</sup>
+                        <mat-icon class="ahead">fast_forward</mat-icon>
                       }
                     } @else {
                       <span class="none">·</span>
@@ -139,7 +136,7 @@
 
       <ul class="legend muted">
         <li><sup>P</sup> ponovljena runda (zamjenjuje prvi pokušaj)</li>
-        <li><sup>U</sup> odigrano unaprijed</li>
+        <li><mat-icon class="ahead">fast_forward</mat-icon> odigrano unaprijed</li>
         @if (league()!.dropWorst) {
           <li><span class="sample dropped">+6</span> tjedan koji se ne broji</li>
         }
