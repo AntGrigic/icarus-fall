@@ -104,4 +104,11 @@
 
 .tabs {
   margin-top: 4px;
+
+  // Material makes the active tab body its own scroll box, so a few px of overflow
+  // (e.g. a button's touch target) shows an inner scrollbar. Let the page scroll instead.
+  ::ng-deep .mat-mdc-tab-body-active,
+  ::ng-deep .mat-mdc-tab-body-content {
+    overflow: visible;
+  }
 }
