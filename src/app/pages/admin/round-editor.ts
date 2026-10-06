@@ -97,16 +97,22 @@ export interface RoundEditorData {
     .warn { margin: 0 0 12px; color: var(--mat-sys-tertiary); }
     .who { margin-top: 0; }
     .holes { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
-    .hole { display: flex; flex-direction: column; padding: 6px; border-radius: 10px; background: var(--score-bg, var(--mat-sys-surface-container-high)); color: var(--score-fg, inherit); }
+    .hole {
+      display: flex; flex-direction: column; padding: 8px; border-radius: 14px;
+      background: var(--score-bg, color-mix(in srgb, var(--mat-sys-surface-container-highest) 70%, transparent));
+      color: var(--score-fg, inherit); transition: background-color 300ms, color 300ms;
+    }
     .hn { font: var(--mat-sys-label-medium); }
     .hn small { opacity: 0.7; }
     .hole input {
       width: 100%; box-sizing: border-box; margin-top: 4px; padding: 4px;
       font: var(--mat-sys-title-medium); text-align: center;
-      border: 1px solid var(--mat-sys-outline-variant); border-radius: 6px;
+      font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+      border: 1px solid var(--glass-border-strong); border-radius: 10px;
       background: var(--mat-sys-surface); color: var(--mat-sys-on-surface);
     }
-    .total { margin: 14px 0 0; font: var(--mat-sys-title-medium); }
+    .total { margin: 16px 0 0; font: var(--mat-sys-title-medium); }
+    .total strong { font: 700 20px / 1 'Space Grotesk', sans-serif; }
   `,
 })
 export class RoundEditor {

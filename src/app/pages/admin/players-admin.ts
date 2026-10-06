@@ -102,8 +102,9 @@ interface PlayerForm {
     .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: center; }
     .actions { display: flex; justify-content: flex-end; gap: 8px; }
     .count { margin: 0; font: var(--mat-sys-body-small); }
+    .edit { animation: rise 300ms var(--ease-out) both; }
     .list { list-style: none; margin: 0; padding: 4px 8px 4px 16px; }
-    .list li { display: flex; align-items: center; gap: 4px; padding: 6px 0; border-bottom: 1px solid var(--mat-sys-outline-variant); }
+    .list li { display: flex; align-items: center; gap: 4px; padding: 8px 0; border-bottom: 1px solid var(--glass-border); }
     .list li:last-child { border-bottom: 0; }
     .who { flex: 1; display: flex; flex-direction: column; min-width: 0; }
     .pname { font-weight: 500; }

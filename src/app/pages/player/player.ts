@@ -1,7 +1,6 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 
 import { computeStandings, roundTypeLabel, WeekCell } from '../../core/league-math';
@@ -11,12 +10,12 @@ import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/forma
 /** One player's rounds in the viewed league, hole by hole. */
 @Component({
   selector: 'app-player',
-  imports: [RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule, ToParPipe],
+  imports: [RouterLink, MatButtonModule, MatIconModule, ToParPipe],
   template: `
     <div class="page narrow">
       <a mat-button routerLink="/standings" class="back"><mat-icon>arrow_back</mat-icon> Poredak</a>
       @if (!store.ready() || !store.viewedRounds()) {
-        <div class="loading"><mat-spinner diameter="40" /></div>
+        <div class="loading"><span class="orbit-loader" role="progressbar" aria-label="Učitavanje"></span></div>
       } @else if (!row()) {
         <div class="empty-state">
           <mat-icon>person_off</mat-icon>
@@ -26,14 +25,14 @@ import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/forma
       } @else {
         @let r = row()!;
         <header class="page-head">
-          <div>
+          <div class="who">
             <h1>{{ r.name }}</h1>
             <p class="muted sub">{{ store.viewedLeague()?.name }} · {{ r.division === 'W' ? 'Žene' : 'Muškarci' }}</p>
           </div>
           <div class="stats">
-            <div><span class="stat" [class]="totalClass(r.total)">{{ r.total | toPar }}</span><span class="muted">Ukupno</span></div>
-            <div><span class="stat">{{ r.rank ? (r.tied ? 'T' : '') + r.rank : '–' }}</span><span class="muted">Mjesto</span></div>
-            <div><span class="stat">{{ r.counted }}</span><span class="muted">Tjedni</span></div>
+            <div class="tile"><span class="stat" [class]="totalClass(r.total)">{{ r.total | toPar }}</span><span class="muted">Ukupno</span></div>
+            <div class="tile lead"><span class="stat">{{ r.rank ? (r.tied ? 'T' : '') + r.rank : '–' }}</span><span>Mjesto</span></div>
+            <div class="tile"><span class="stat">{{ r.counted }}</span><span class="muted">Tjedni</span></div>
           </div>
         </header>
 
@@ -75,16 +74,27 @@ import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/forma
     .narrow { max-width: 760px; }
     .back { margin: -8px 0 8px -8px; }
     .sub { margin: 4px 0 0; }
-    .stats { display: flex; gap: 20px; }
-    .stats > div { display: flex; flex-direction: column; align-items: center; font: var(--mat-sys-label-small); }
-    .stat { font: var(--mat-sys-headline-small); }
-    .week { margin-bottom: 12px; }
+    .who { min-width: 0; }
+    .stats { display: flex; gap: 10px; }
+    .tile {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+      min-width: 76px; padding: 12px 10px; border-radius: 18px; font: var(--mat-sys-label-small);
+      background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(14px);
+      box-shadow: var(--shadow-1), inset 0 1px 0 var(--glass-shine);
+    }
+    .tile.lead { background: var(--brand-grad); color: var(--on-brand); border-color: transparent; }
+    .stat { font: 700 26px / 1.1 'Space Grotesk', sans-serif; }
+    .week { margin-bottom: 14px; }
     .week.faded { opacity: 0.65; }
     .week-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .spacer { flex: 1; }
-    .score { font: var(--mat-sys-title-large); }
-    .holes { display: grid; grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 4px; }
-    .h { display: flex; flex-direction: column; align-items: center; padding: 3px 0; border-radius: 8px; background: var(--score-bg, var(--mat-sys-surface-container-high)); color: var(--score-fg, inherit); }
+    .score { font: 700 22px / 1 'Space Grotesk', sans-serif; }
+    .holes { display: grid; grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); gap: 5px; }
+    .h {
+      display: flex; flex-direction: column; align-items: center; padding: 4px 0; border-radius: 10px;
+      background: var(--score-bg, color-mix(in srgb, var(--mat-sys-surface-container-highest) 70%, transparent));
+      color: var(--score-fg, inherit);
+    }
     .hn { font-size: 10px; opacity: 0.7; }
     .hs { font-weight: 700; }
     .meta { margin: 10px 0 0; font: var(--mat-sys-body-small); }

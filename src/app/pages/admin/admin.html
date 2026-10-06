@@ -1,6 +1,6 @@
 <div class="page">
   @if (!store.ready()) {
-    <div class="loading"><mat-spinner diameter="40" /></div>
+    <div class="loading"><span class="orbit-loader" role="progressbar" aria-label="Učitavanje"></span></div>
   } @else if (!store.isAdmin()) {
     <section class="login panel">
       <img class="login-logo" src="logo.png" alt="" width="72" height="72" />
@@ -99,7 +99,7 @@
         </button>
       </div>
 
-      <mat-tab-group mat-stretch-tabs="false" animationDuration="150ms" class="tabs">
+      <mat-tab-group mat-stretch-tabs="false" animationDuration="250ms" class="tabs">
         <mat-tab label="Liga">
           <ng-template matTabContent>
             <app-league-settings [league]="league()" />

@@ -89,10 +89,14 @@ import { RoundEditor, RoundEditorData } from './round-editor';
     .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
     .week { width: 150px; }
     .search { flex: 1; min-width: 180px; }
-    .table-wrap { overflow-x: auto; border: 1px solid var(--mat-sys-outline-variant); border-radius: var(--radius); }
+    .table-wrap {
+      overflow-x: auto; border: 1px solid var(--glass-border); border-radius: var(--radius);
+      background: var(--glass-strong); box-shadow: var(--shadow-1); backdrop-filter: blur(16px);
+    }
     table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-    th, td { padding: 6px 8px; text-align: center; white-space: nowrap; border-bottom: 1px solid var(--mat-sys-outline-variant); }
-    th { font: var(--mat-sys-label-medium); color: var(--mat-sys-on-surface-variant); background: var(--mat-sys-surface-container); padding: 10px 8px; }
+    th, td { padding: 6px 8px; text-align: center; white-space: nowrap; border-bottom: 1px solid var(--glass-border); }
+    th { font: var(--mat-sys-label-medium); letter-spacing: 0.04em; text-transform: uppercase; color: var(--mat-sys-on-surface-variant); padding: 12px 8px; }
+    tbody tr:hover td { background: color-mix(in srgb, var(--jx-amber) 8%, transparent); }
     tbody tr:last-child td { border-bottom: 0; }
     .left { text-align: left; }
     .actions { text-align: right; }

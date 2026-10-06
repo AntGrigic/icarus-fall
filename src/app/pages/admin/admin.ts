@@ -1,7 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -19,7 +18,6 @@ import { WeeksSettings } from './weeks-settings';
   imports: [
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     MatSelectModule,
     MatTabsModule,
     LeagueSettings,
