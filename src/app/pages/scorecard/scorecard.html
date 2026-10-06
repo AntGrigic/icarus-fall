@@ -1,7 +1,13 @@
 @if (view() === 'done' && submitted(); as done) {
   <div class="page narrow done">
     <div class="done-icon" [class.queued]="done.result === 'queued'">
-      <mat-icon>{{ done.result === 'saved' ? 'check' : 'cloud_upload' }}</mat-icon>
+      @if (done.result === 'saved') {
+        <svg class="check" viewBox="0 0 52 52" aria-hidden="true">
+          <path d="M15 27 l8 8 l15 -17" />
+        </svg>
+      } @else {
+        <mat-icon>cloud_upload</mat-icon>
+      }
     </div>
     <h1>{{ done.result === 'saved' ? 'Rezultati su spremljeni' : 'Spremljeno na ovom mobitelu' }}</h1>
     <p class="muted">
@@ -23,24 +29,30 @@
     </ul>
     <div class="done-actions">
       <a mat-stroked-button routerLink="/play">Nova runda</a>
-      <a mat-flat-button routerLink="/standings">Pogledaj poredak</a>
+      <a mat-flat-button routerLink="/standings">
+        <mat-icon>leaderboard</mat-icon>
+        Pogledaj poredak
+      </a>
     </div>
   </div>
 } @else if (card(); as c) {
   @if (view() === 'hole' && hole(); as h) {
     <div class="page narrow hole-page">
       <header class="hole-head">
-        <button mat-icon-button (click)="prev()" [disabled]="index() === 0" aria-label="Prethodni koš">
+        <button mat-icon-button class="nav-btn" (click)="prev()" [disabled]="index() === 0" aria-label="Prethodni koš">
           <mat-icon>chevron_left</mat-icon>
         </button>
         <div class="hole-title">
-          <span class="hole-no">Koš {{ h.number }}</span>
-          <span class="hole-par">Par {{ h.par }} · {{ index() + 1 }}/{{ c.holes.length }}</span>
+          <span class="eyebrow">Koš</span>
+          @for (k of [h.number]; track k) {
+            <span class="hole-no" [class.back]="dir() < 0">{{ k }}</span>
+          }
+          <span class="hole-par"><span class="par-chip">Par {{ h.par }}</span> {{ index() + 1 }}/{{ c.holes.length }}</span>
         </div>
-        <button mat-icon-button (click)="next()" aria-label="Sljedeći koš">
+        <button mat-icon-button class="nav-btn" (click)="next()" aria-label="Sljedeći koš">
           <mat-icon>chevron_right</mat-icon>
         </button>
-        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Opcije scorecarda">
+        <button mat-icon-button class="menu-btn" [matMenuTriggerFor]="menu" aria-label="Opcije scorecarda">
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #menu="matMenu">
@@ -55,7 +67,11 @@
         </mat-menu>
       </header>
 
-      <nav class="hole-strip" aria-label="Koševi">
+      <div class="progress" aria-hidden="true">
+        <span [style.width.%]="((index() + 1) / c.holes.length) * 100"></span>
+      </div>
+
+      <nav class="hole-strip" #strip aria-label="Koševi">
         @for (hh of c.holes; track hh.number; let i = $index) {
           <button
             class="dot"
@@ -63,41 +79,46 @@
             [class.done]="holeDone(i)"
             (click)="goToHole(i)"
             [attr.aria-label]="'Koš ' + hh.number"
+            [attr.aria-current]="i === index() ? 'step' : null"
           >
             {{ hh.number }}
           </button>
         }
       </nav>
 
-      <section class="rows">
-        @for (p of throwers(); track p.playerId) {
-          @let s = score(p, index());
-          <div class="score-row">
-            <div class="who">
-              <span class="pname">{{ p.name }}</span>
-              <span class="ptotal">
-                <span [class]="totalClass(toPar(p))">{{ thru(p) ? (toPar(p) | toPar) : '–' }}</span>
-                <span class="muted"> · nakon {{ thru(p) }}</span>
-              </span>
+      @for (k of [index()]; track k) {
+        <section class="rows" [class.back]="dir() < 0">
+          @for (p of throwers(); track p.playerId) {
+            @let s = score(p, index());
+            <div class="score-row">
+              <div class="who">
+                <span class="pname">{{ p.name }}</span>
+                <span class="ptotal">
+                  <span [class]="totalClass(toPar(p))">{{ thru(p) ? (toPar(p) | toPar) : '–' }}</span>
+                  <span class="muted"> · nakon {{ thru(p) }}</span>
+                </span>
+              </div>
+              <button class="step" (click)="change(p, -1)" [attr.aria-label]="'Jedno manje za ' + p.name">
+                <mat-icon>remove</mat-icon>
+              </button>
+              <button
+                class="value"
+                [class.unset]="s === null"
+                [class]="s !== null ? scoreClass(s - h.par) : ''"
+                (click)="confirmPar(p)"
+                [attr.aria-label]="'Bacanja za ' + p.name"
+              >
+                @for (v of [s ?? h.par]; track v) {
+                  <span class="num" [class.down]="lastChange()[p.playerId] < 0">{{ v }}</span>
+                }
+              </button>
+              <button class="step" (click)="change(p, 1)" [attr.aria-label]="'Jedno više za ' + p.name">
+                <mat-icon>add</mat-icon>
+              </button>
             </div>
-            <button class="step" (click)="change(p, -1)" [attr.aria-label]="'Jedno manje za ' + p.name">
-              <mat-icon>remove</mat-icon>
-            </button>
-            <button
-              class="value"
-              [class.unset]="s === null"
-              [class]="s !== null ? scoreClass(s - h.par) : ''"
-              (click)="confirmPar(p)"
-              [attr.aria-label]="'Bacanja za ' + p.name"
-            >
-              {{ s ?? h.par }}
-            </button>
-            <button class="step" (click)="change(p, 1)" [attr.aria-label]="'Jedno više za ' + p.name">
-              <mat-icon>add</mat-icon>
-            </button>
-          </div>
-        }
-      </section>
+          }
+        </section>
+      }
 
       <div class="hole-actions">
         @if (isLast()) {
@@ -155,7 +176,11 @@
           <div class="mini-card">
             @for (hh of c.holes; track hh.number; let i = $index) {
               @let s = score(p, i);
-              <button class="mini" (click)="goToHole(i)" [class]="s !== null ? scoreClass(s - hh.par) : 'missing'">
+              <button
+                class="mini"
+                (click)="goToHole(i)"
+                [class]="s !== null ? scoreClass(s - hh.par) : 'missing'"
+              >
                 <span class="mn">{{ hh.number }}</span>
                 <span class="ms">{{ s ?? '?' }}</span>
               </button>

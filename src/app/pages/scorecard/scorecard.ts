@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -43,6 +43,12 @@ export class ScorecardPage {
   protected readonly scoreClass = scoreClass;
   protected readonly totalClass = totalClass;
 
+  /** Which way the last hole change went, so the next hole slides in from that side. */
+  protected readonly dir = signal<1 | -1>(1);
+  /** Last +/- per player, so the number rolls up or down. */
+  protected readonly lastChange = signal<Record<string, number>>({});
+  private readonly strip = viewChild<ElementRef<HTMLElement>>('strip');
+
   protected readonly index = computed(() => this.card()?.holeIndex ?? 0);
   protected readonly hole = computed(() => this.card()?.holes[this.index()] ?? null);
   protected readonly isLast = computed(() => this.index() === (this.card()?.holes.length ?? 0) - 1);
@@ -77,6 +83,20 @@ export class ScorecardPage {
     effect(() => {
       if (!this.card() && this.view() !== 'done') this.router.navigate(['/play']);
     });
+
+    // Keep the current hole's dot centred in the strip as the round moves along.
+    effect(() => {
+      const strip = this.strip()?.nativeElement;
+      const i = this.index();
+      if (!strip) return;
+      requestAnimationFrame(() => {
+        const dot = strip.children[i] as HTMLElement | undefined;
+        if (!dot) return;
+        const left = dot.offsetLeft - (strip.clientWidth - dot.offsetWidth) / 2;
+        const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+        strip.scrollTo({ left, behavior: smooth ? 'smooth' : 'auto' });
+      });
+    });
   }
 
   protected score(p: CardPlayer, holeIndex: number): number | null {
@@ -108,6 +128,7 @@ export class ScorecardPage {
     const hole = this.hole();
     if (!hole) return;
     const current = this.score(p, this.index()) ?? hole.par;
+    this.lastChange.update((last) => ({ ...last, [p.playerId]: delta }));
     this.cards.setScore(p.playerId, this.index(), Math.min(MAX_STROKES, Math.max(1, current + delta)));
   }
 
@@ -117,16 +138,19 @@ export class ScorecardPage {
   }
 
   protected next(): void {
+    this.dir.set(1);
     this.cards.fillPar(this.index());
     if (this.isLast()) this.view.set('review');
     else this.cards.goToHole(this.index() + 1);
   }
 
   protected prev(): void {
+    this.dir.set(-1);
     this.cards.goToHole(this.index() - 1);
   }
 
   protected goToHole(i: number): void {
+    this.dir.set(i < this.index() ? -1 : 1);
     this.cards.goToHole(i);
     this.view.set('hole');
   }
