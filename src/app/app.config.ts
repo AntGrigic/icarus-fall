@@ -3,8 +3,10 @@ import {
   inject,
   Injectable,
   isDevMode,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
+import { MatIconRegistry } from '@angular/material/icon';
 import { Title } from '@angular/platform-browser';
 import {
   provideRouter,
@@ -36,6 +38,10 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
     ),
+    // Rounded icon font (loaded in index.html) instead of the default sharp one.
+    provideAppInitializer(() => {
+      inject(MatIconRegistry).setDefaultFontSetClass('material-icons-round', 'mat-ligature-font');
+    }),
     { provide: TitleStrategy, useClass: AppTitleStrategy },
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
