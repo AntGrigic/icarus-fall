@@ -1,16 +1,16 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { fullName, matchesSearch } from '../../core/league-math';
-import { Division, DIVISIONS, League, Player } from '../../core/models';
+import { Division, League, Player } from '../../core/models';
 import { DataStore, describeError } from '../../data/data-store';
 import { Confirm } from '../../shared/confirm';
+import { DivisionSwitch } from '../../shared/division-switch';
 
 interface PlayerForm {
   firstName: string;
@@ -23,10 +23,10 @@ interface PlayerForm {
   imports: [
     FormsModule,
     MatButtonModule,
-    MatButtonToggleModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    DivisionSwitch,
   ],
   template: `
     <div class="players">
@@ -54,11 +54,7 @@ interface PlayerForm {
               <mat-label>Last name</mat-label>
               <input matInput name="last" [(ngModel)]="form.lastName" required />
             </mat-form-field>
-            <mat-button-toggle-group name="division" [(ngModel)]="form.division" aria-label="Division">
-              @for (d of divisions; track d.id) {
-                <mat-button-toggle [value]="d.id">{{ d.label }}</mat-button-toggle>
-              }
-            </mat-button-toggle-group>
+            <app-division-switch [(value)]="form.division" />
           </div>
           @if (formError()) {
             <p class="error-text">{{ formError() }}</p>
@@ -119,7 +115,6 @@ export class PlayersAdmin {
 
   readonly league = input.required<League>();
 
-  protected readonly divisions = DIVISIONS;
   protected readonly name = fullName;
   protected readonly query = signal('');
   /** null = form closed, '' = adding, otherwise the id being edited. */

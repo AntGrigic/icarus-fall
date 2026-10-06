@@ -45,29 +45,12 @@
       </div>
     }
 
-    <div class="toolbar">
-      <mat-button-toggle-group
-        [value]="division()"
-        (change)="setDivision($event.value)"
-        aria-label="Division"
-        hideSingleSelectionIndicator
-      >
-        @for (d of divisions; track d.id) {
-          <mat-button-toggle [value]="d.id">
-            {{ d.label }}
-            <span class="count">{{ standingsByDivision()?.[d.id]?.rows?.length ?? 0 }}</span>
-          </mat-button-toggle>
-        }
-      </mat-button-toggle-group>
-      <p class="muted rules">
-        Ranked by weeks played, then lowest total.
-        @if (league()!.dropWorst) {
-          Each player's {{ league()!.dropWorst }} worst week{{ league()!.dropWorst > 1 ? 's are' : ' is' }} dropped.
-        } @else {
-          Every week counts.
-        }
-      </p>
-    </div>
+    <app-division-switch
+      class="divisions"
+      [value]="division()"
+      (valueChange)="setDivision($event)"
+      [counts]="divisionCounts()"
+    />
 
     @if (!standings()) {
       <div class="loading"><mat-spinner diameter="40" /></div>

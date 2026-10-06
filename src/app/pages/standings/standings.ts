@@ -1,14 +1,14 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 
 import { computeStandings, disabledHoles, parseYmd, weekRange } from '../../core/league-math';
-import { Division, DIVISIONS } from '../../core/models';
+import { Division } from '../../core/models';
 import { DataStore } from '../../data/data-store';
+import { DivisionSwitch } from '../../shared/division-switch';
 import { formatDay, formatRange, ToParPipe, totalClass } from '../../shared/format';
 
 const DIVISION_KEY = 'icarus-fall.division';
@@ -18,10 +18,10 @@ const DIVISION_KEY = 'icarus-fall.division';
   imports: [
     RouterLink,
     MatButtonModule,
-    MatButtonToggleModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    DivisionSwitch,
     ToParPipe,
   ],
   templateUrl: './standings.html',
@@ -29,7 +29,6 @@ const DIVISION_KEY = 'icarus-fall.division';
 })
 export class StandingsPage {
   protected readonly store = inject(DataStore);
-  protected readonly divisions = DIVISIONS;
   protected readonly totalClass = totalClass;
 
   protected readonly division = signal<Division>(readDivision());
@@ -49,6 +48,11 @@ export class StandingsPage {
   });
 
   protected readonly standings = computed(() => this.standingsByDivision()?.[this.division()] ?? null);
+
+  protected readonly divisionCounts = computed(() => {
+    const all = this.standingsByDivision();
+    return { M: all?.M.rows.length ?? 0, W: all?.W.rows.length ?? 0 };
+  });
 
   protected readonly weeks = computed(() =>
     Array.from({ length: this.league()?.totalWeeks ?? 0 }, (_, i) => i + 1),

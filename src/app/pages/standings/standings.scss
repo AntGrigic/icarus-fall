@@ -12,23 +12,8 @@
   min-width: 220px;
 }
 
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 16px;
-  margin-bottom: 12px;
-
-  .rules {
-    margin: 0;
-    font: var(--mat-sys-body-small);
-  }
-}
-
-.count {
-  margin-left: 6px;
-  font: var(--mat-sys-label-small);
-  opacity: 0.7;
+.divisions {
+  margin-bottom: 16px;
 }
 
 .table-wrap {

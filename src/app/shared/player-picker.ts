@@ -2,7 +2,6 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -10,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { fullName, matchesSearch, tidyName } from '../core/league-math';
 import { Division, DIVISIONS, Player } from '../core/models';
 import { DataStore } from '../data/data-store';
+import { DivisionSwitch } from './division-switch';
 
 const NEW_PLAYER = '__new__';
 
@@ -23,10 +23,10 @@ const NEW_PLAYER = '__new__';
     FormsModule,
     MatAutocompleteModule,
     MatButtonModule,
-    MatButtonToggleModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    DivisionSwitch,
   ],
   template: `
     @if (!creating()) {
@@ -73,11 +73,7 @@ const NEW_PLAYER = '__new__';
             <input matInput name="lastName" [(ngModel)]="lastName" required autocomplete="family-name" />
           </mat-form-field>
         </div>
-        <mat-button-toggle-group name="division" [(ngModel)]="division" aria-label="Division">
-          @for (d of divisions; track d.id) {
-            <mat-button-toggle [value]="d.id">{{ d.label }}</mat-button-toggle>
-          }
-        </mat-button-toggle-group>
+        <app-division-switch [(value)]="division" />
         @if (existing(); as e) {
           <p class="muted hint">{{ name(e) }} is already registered and will be added.</p>
         }
@@ -132,7 +128,6 @@ export class PlayerPicker {
   readonly unavailable = input<(p: Player) => string | null>(() => null);
   readonly picked = output<Player>();
 
-  protected readonly divisions = DIVISIONS;
   protected readonly newPlayer = NEW_PLAYER;
   protected readonly name = fullName;
   protected readonly blank = () => '';
