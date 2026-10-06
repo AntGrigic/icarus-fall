@@ -2,18 +2,23 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
+/* ---------- Demo banner ---------- */
+
 .demo-banner {
+  position: relative;
+  z-index: 21;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 6px var(--gutter);
+  padding: 7px var(--gutter);
   font: var(--mat-sys-label-medium);
-  background: var(--mat-sys-tertiary-container);
-  color: var(--mat-sys-on-tertiary-container);
+  color: var(--mat-sys-on-primary-container);
   text-align: center;
+  background: var(--mat-sys-primary-container);
 
   mat-icon {
     font-size: 18px;
@@ -23,29 +28,55 @@
   }
 }
 
+/* ---------- Top bar ---------- */
+
 .topbar {
   position: sticky;
   top: 0;
-  z-index: 10;
-  background: var(--bar-bg);
-  color: var(--bar-fg);
+  z-index: 20;
+  view-transition-name: topbar;
   padding: 0 var(--gutter);
+  background-color: var(--glass-strong);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+/* Where supported, the bar starts clear and frosts over as the page scrolls under it. */
+@supports (animation-timeline: scroll()) {
+  .topbar {
+    background-color: transparent;
+    border-bottom-color: transparent;
+    animation: bar-frost linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 96px;
+  }
+}
+
+.topbar-inner {
+  max-width: calc(var(--page-max) - 2 * var(--gutter));
+  height: 72px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   color: inherit;
   text-decoration: none;
   min-width: 0;
 }
 
 .logo {
+  flex: none;
   width: 40px;
   height: 40px;
-  flex: none;
-  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
+  border-radius: 50%;
+  box-shadow: 0 4px 14px -4px var(--glow);
 }
 
 .brand-text {
@@ -56,32 +87,100 @@
 }
 
 .brand-title {
-  font: var(--mat-sys-title-medium);
+  font-family: 'Space Grotesk', Inter, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .brand-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
   font: var(--mat-sys-label-small);
-  opacity: 0.85;
+  color: var(--mat-sys-on-surface-variant);
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+  }
 }
 
 .spacer {
   flex: 1;
 }
 
-.top-nav a {
-  color: var(--bar-fg);
-  margin-left: 4px;
+/* Pill navigation with a gradient highlight that slides to the active page. */
+.top-nav,
+.bottom-nav {
+  .ink {
+    position: absolute;
+    top: var(--pad);
+    bottom: var(--pad);
+    left: var(--pad);
+    width: calc((100% - 2 * var(--pad)) / var(--count));
+    border-radius: var(--ink-radius);
+    background: var(--brand-grad);
+    transform: translateX(calc(var(--active) * 100%));
+    transition: transform 350ms var(--ease-out);
+  }
 
-  &.active {
-    background: color-mix(in srgb, var(--bar-fg) 18%, transparent);
+  a {
+    position: relative;
+    color: var(--mat-sys-on-surface-variant);
+    text-decoration: none;
+    transition: color 250ms ease;
+
+    &:hover:not(.active) {
+      color: var(--mat-sys-on-surface);
+    }
+
+    &.active {
+      color: var(--on-brand);
+    }
+  }
+}
+
+.top-nav {
+  --pad: 5px;
+  --ink-radius: 999px;
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: var(--pad);
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-shine);
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 42px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font: var(--mat-sys-label-large);
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 }
 
 main {
   flex: 1;
+  view-transition-name: page;
+  // Slide-in animations start off to the side; clip (not hidden) so sticky children still work.
+  overflow-x: clip;
 }
 
 .bottom-nav {
@@ -89,61 +188,77 @@ main {
 }
 
 @media (max-width: 719px) {
+  .topbar-inner {
+    height: 64px;
+  }
+
   .top-nav {
     display: none;
   }
 
   main {
-    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+    padding-bottom: calc(100px + env(safe-area-inset-bottom));
   }
 
   .bottom-nav {
-    display: flex;
+    --pad: 6px;
+    --ink-radius: 20px;
     position: fixed;
-    inset: auto 0 0 0;
-    z-index: 10;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
-    background: var(--mat-sys-surface-container);
-    border-top: 1px solid var(--mat-sys-outline-variant);
+    left: 12px;
+    right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    z-index: 20;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    height: 68px;
+    padding: var(--pad);
+    box-sizing: border-box;
+    border-radius: 26px;
+    background: var(--glass-strong);
+    border: 1px solid var(--glass-border-strong);
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    box-shadow:
+      0 18px 40px -16px rgb(0 0 0 / 0.55),
+      inset 0 1px 0 var(--glass-shine);
+    view-transition-name: dock;
 
     a {
-      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2px;
-      padding: 4px 0;
-      color: var(--mat-sys-on-surface-variant);
-      text-decoration: none;
-      font: var(--mat-sys-label-medium);
+      justify-content: center;
+      gap: 3px;
+      border-radius: 20px;
+      font: var(--mat-sys-label-small);
+      font-weight: 600;
     }
 
-    .icon-pill {
+    .icon {
       position: relative;
       display: flex;
-      justify-content: center;
-      width: 56px;
-      padding: 4px 0;
-      border-radius: 16px;
-    }
-
-    a.active {
-      color: var(--mat-sys-on-surface);
-
-      .icon-pill {
-        background: var(--mat-sys-secondary-container);
-        color: var(--mat-sys-on-secondary-container);
-      }
     }
 
     .badge {
       position: absolute;
-      top: 3px;
-      right: 14px;
+      top: -2px;
+      right: -6px;
       width: 9px;
       height: 9px;
       border-radius: 50%;
-      background: var(--mat-sys-tertiary);
+      background: var(--under);
+      box-shadow: 0 0 0 2px var(--glass-solid);
     }
+  }
+}
+
+/* ---------- Motion ---------- */
+
+@keyframes bar-frost {
+  to {
+    background-color: var(--glass-strong);
+    border-bottom-color: var(--glass-border);
+    box-shadow: 0 12px 30px -20px rgb(0 0 0 / 0.5);
   }
 }

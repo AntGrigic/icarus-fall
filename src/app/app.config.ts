@@ -14,6 +14,7 @@ import {
   TitleStrategy,
   withComponentInputBinding,
   withInMemoryScrolling,
+  withViewTransitions,
 } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 
@@ -37,6 +38,8 @@ export const appConfig: ApplicationConfig = {
       routes,
       withComponentInputBinding(),
       withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
+      // Pages glide in and out (animations in styles.scss); browsers without support just swap.
+      withViewTransitions({ skipInitialTransition: true }),
     ),
     // Rounded icon font (loaded in index.html) instead of the default sharp one.
     provideAppInitializer(() => {

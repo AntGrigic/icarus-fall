@@ -1,3 +1,17 @@
+<!-- Backdrop: stars, a soft glow and a slowly turning Jupiter. -->
+<div class="sky" aria-hidden="true">
+  <div class="stars"></div>
+  <div class="nebula one"></div>
+  <div class="nebula two"></div>
+  <div class="world">
+    <div class="planet">
+      <div class="jets east"></div>
+      <div class="jets west"></div>
+      <div class="red-spot"></div>
+    </div>
+  </div>
+</div>
+
 @if (store.mode() === 'demo') {
   <div class="demo-banner">
     <mat-icon>science</mat-icon>
@@ -5,47 +19,54 @@
   </div>
 }
 
-<mat-toolbar class="topbar">
-  <a class="brand" routerLink="/standings">
-    <img class="logo" src="logo.png" alt="Jupiter shades" width="40" height="40" />
-    <span class="brand-text">
-      <span class="brand-title">{{ store.activeLeague()?.name ?? 'Jupiter shades' }}</span>
-      @if (store.activeWeek(); as w) {
-        <span class="brand-sub">
-          @switch (w.status) {
-            @case ('running') { Tjedan {{ w.week }} od {{ store.activeLeague()!.totalWeeks }} }
-            @case ('upcoming') { Uskoro počinje }
-            @case ('finished') { Sezona je završila }
-          }
-        </span>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" routerLink="/standings">
+      <img class="logo" src="logo.png" alt="Jupiter shades" width="40" height="40" />
+      <span class="brand-text">
+        <span class="brand-title">{{ store.activeLeague()?.name ?? 'Jupiter shades' }}</span>
+        @if (store.activeWeek(); as w) {
+          <span class="brand-sub">
+            @switch (w.status) {
+              @case ('running') {
+                <span class="live-dot"></span>
+                Tjedan {{ w.week }} od {{ store.activeLeague()!.totalWeeks }}
+              }
+              @case ('upcoming') { Uskoro počinje }
+              @case ('finished') { Sezona je završila }
+            }
+          </span>
+        }
+      </span>
+    </a>
+    <span class="spacer"></span>
+    <nav class="top-nav" aria-label="Glavni izbornik" [style.--active]="activeIndex()" [style.--count]="nav.length">
+      <span class="ink" aria-hidden="true"></span>
+      @for (item of nav; track item.path; let i = $index) {
+        <a [routerLink]="item.path" [class.active]="i === activeIndex()" [attr.aria-current]="i === activeIndex() ? 'page' : null">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          {{ item.label }}
+        </a>
       }
-    </span>
-  </a>
-  <span class="spacer"></span>
-  <nav class="top-nav" aria-label="Glavni izbornik">
-    @for (item of nav; track item.path) {
-      <a mat-button [routerLink]="item.path" routerLinkActive="active">
-        <mat-icon>{{ item.icon }}</mat-icon>
-        {{ item.label }}
-      </a>
-    }
-  </nav>
-</mat-toolbar>
+    </nav>
+  </div>
+</header>
 
 <main>
   <router-outlet />
 </main>
 
-<nav class="bottom-nav" aria-label="Glavni izbornik">
-  @for (item of nav; track item.path) {
-    <a [routerLink]="item.path" routerLinkActive="active">
-      <span class="icon-pill">
+<nav class="bottom-nav" aria-label="Glavni izbornik" [style.--active]="activeIndex()" [style.--count]="nav.length">
+  <span class="ink" aria-hidden="true"></span>
+  @for (item of nav; track item.path; let i = $index) {
+    <a [routerLink]="item.path" [class.active]="i === activeIndex()" [attr.aria-current]="i === activeIndex() ? 'page' : null">
+      <span class="icon">
         <mat-icon>{{ item.icon }}</mat-icon>
         @if (item.path === '/play' && cards.card()) {
           <span class="badge" aria-label="Runda u tijeku"></span>
         }
       </span>
-      <span>{{ item.label }}</span>
+      <span class="label">{{ item.label }}</span>
     </a>
   }
 </nav>
