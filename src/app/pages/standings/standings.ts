@@ -9,7 +9,7 @@ import { computeStandings, disabledHoles, parseYmd, weekRange } from '../../core
 import { Division } from '../../core/models';
 import { DataStore } from '../../data/data-store';
 import { DivisionSwitch } from '../../shared/division-switch';
-import { formatDay, formatRange, ToParPipe, totalClass } from '../../shared/format';
+import { formatDay, formatRange, plural, ToParPipe, totalClass } from '../../shared/format';
 
 const DIVISION_KEY = 'icarus-fall.division';
 
@@ -30,6 +30,7 @@ const DIVISION_KEY = 'icarus-fall.division';
 export class StandingsPage {
   protected readonly store = inject(DataStore);
   protected readonly totalClass = totalClass;
+  protected readonly plural = plural;
 
   protected readonly division = signal<Division>(readDivision());
   protected readonly league = this.store.viewedLeague;
@@ -63,13 +64,14 @@ export class StandingsPage {
     const info = this.standings()?.info;
     if (!league || !info) return '';
     const range = formatRange(weekRange(league, info.week));
+    const weeks = `${league.totalWeeks} ${plural(league.totalWeeks, 'tjedan', 'tjedna', 'tjedana')}`;
     switch (info.status) {
       case 'upcoming':
-        return `Starts ${formatDay(parseYmd(league.startDate))} · ${league.totalWeeks} weeks`;
+        return `Počinje ${formatDay(parseYmd(league.startDate))} · ${weeks}`;
       case 'finished':
-        return `Finished · ${league.totalWeeks} weeks`;
+        return `Završeno · ${weeks}`;
       default:
-        return `Week ${info.week} of ${league.totalWeeks} · ${range}`;
+        return `Tjedan ${info.week} od ${league.totalWeeks} · ${range}`;
     }
   });
 

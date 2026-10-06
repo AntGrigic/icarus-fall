@@ -12,7 +12,7 @@ import { fullName, normalizeText, roundTypeLabel } from '../../core/league-math'
 import { League, Round } from '../../core/models';
 import { DataStore } from '../../data/data-store';
 import { Confirm } from '../../shared/confirm';
-import { formatDay, ToParPipe, totalClass } from '../../shared/format';
+import { formatDay, plural, ToParPipe, totalClass } from '../../shared/format';
 import { RoundEditor, RoundEditorData } from './round-editor';
 
 @Component({
@@ -22,22 +22,22 @@ import { RoundEditor, RoundEditorData } from './round-editor';
     <div class="rounds">
       <div class="bar">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="week">
-          <mat-label>Week</mat-label>
+          <mat-label>Tjedan</mat-label>
           <mat-select [ngModel]="week()" (ngModelChange)="week.set($event)">
-            <mat-option [value]="0">All weeks</mat-option>
+            <mat-option [value]="0">Svi tjedni</mat-option>
             @for (w of weeks(); track w) {
-              <mat-option [value]="w">Week {{ w }}</mat-option>
+              <mat-option [value]="w">Tjedan {{ w }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
           <mat-icon matPrefix>search</mat-icon>
-          <mat-label>Player</mat-label>
+          <mat-label>Igrač</mat-label>
           <input matInput [ngModel]="query()" (ngModelChange)="query.set($event)" />
         </mat-form-field>
         <button mat-flat-button (click)="open(null)">
           <mat-icon>add</mat-icon>
-          Add round
+          Dodaj rundu
         </button>
       </div>
 
@@ -45,12 +45,12 @@ import { RoundEditor, RoundEditorData } from './round-editor';
         <table>
           <thead>
             <tr>
-              <th>Wk</th>
-              <th class="left">Player</th>
-              <th class="left">Round</th>
-              <th>Score</th>
-              <th>Strokes</th>
-              <th>Played</th>
+              <th>Tj.</th>
+              <th class="left">Igrač</th>
+              <th class="left">Runda</th>
+              <th>Rezultat</th>
+              <th>Bacanja</th>
+              <th>Odigrano</th>
               <th></th>
             </tr>
           </thead>
@@ -62,22 +62,22 @@ import { RoundEditor, RoundEditorData } from './round-editor';
                 <td class="left">
                   {{ typeLabel(r.type) }}
                   @if (isReplaced(r)) {
-                    <span class="chip">replaced</span>
+                    <span class="chip">zamijenjena</span>
                   }
                   @if (r.editedAt) {
-                    <span class="chip">edited</span>
+                    <span class="chip">uređena</span>
                   }
                 </td>
                 <td [class]="totalClass(r.toPar)">{{ r.toPar | toPar }}</td>
                 <td>{{ r.strokes }}</td>
                 <td class="muted">{{ day(r.playedAt) }}</td>
                 <td class="actions">
-                  <button mat-icon-button (click)="open(r)" aria-label="Edit round"><mat-icon>edit</mat-icon></button>
-                  <button mat-icon-button (click)="remove(r)" aria-label="Delete round"><mat-icon>delete</mat-icon></button>
+                  <button mat-icon-button (click)="open(r)" aria-label="Uredi rundu"><mat-icon>edit</mat-icon></button>
+                  <button mat-icon-button (click)="remove(r)" aria-label="Obriši rundu"><mat-icon>delete</mat-icon></button>
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="7" class="muted empty">No rounds.</td></tr>
+              <tr><td colspan="7" class="muted empty">Nema rundi.</td></tr>
             }
           </tbody>
         </table>
@@ -147,15 +147,15 @@ export class RoundsAdmin {
 
   protected async remove(r: Round): Promise<void> {
     const ok = await this.confirm.ask({
-      title: 'Delete round?',
-      message: `${this.nameOf(r)}, week ${r.week} (${this.typeLabel(r.type).toLowerCase()}, ${r.strokes} strokes).`,
-      confirmText: 'Delete',
+      title: 'Obrisati rundu?',
+      message: `${this.nameOf(r)}, tjedan ${r.week} (${this.typeLabel(r.type).toLowerCase()}, ${r.strokes} ${plural(r.strokes, 'bacanje', 'bacanja', 'bacanja')}).`,
+      confirmText: 'Obriši',
       danger: true,
     });
     if (!ok) return;
     try {
       await this.store.deleteRound(this.league().id, r);
-      this.snackBar.open('Round deleted', undefined, { duration: 2000 });
+      this.snackBar.open('Runda je obrisana', undefined, { duration: 2000 });
     } catch (e) {
       this.store.reportError(e);
     }

@@ -14,39 +14,39 @@ import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/forma
   imports: [RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule, ToParPipe],
   template: `
     <div class="page narrow">
-      <a mat-button routerLink="/standings" class="back"><mat-icon>arrow_back</mat-icon> Standings</a>
+      <a mat-button routerLink="/standings" class="back"><mat-icon>arrow_back</mat-icon> Poredak</a>
       @if (!store.ready() || !store.viewedRounds()) {
         <div class="loading"><mat-spinner diameter="40" /></div>
       } @else if (!row()) {
         <div class="empty-state">
           <mat-icon>person_off</mat-icon>
-          <h2>No rounds</h2>
-          <p>This player has no rounds in {{ store.viewedLeague()?.name }}.</p>
+          <h2>Nema rundi</h2>
+          <p>Ovaj igrač nema rundi u ligi {{ store.viewedLeague()?.name }}.</p>
         </div>
       } @else {
         @let r = row()!;
         <header class="page-head">
           <div>
             <h1>{{ r.name }}</h1>
-            <p class="muted sub">{{ store.viewedLeague()?.name }} · {{ r.division === 'W' ? 'Women' : 'Men' }}</p>
+            <p class="muted sub">{{ store.viewedLeague()?.name }} · {{ r.division === 'W' ? 'Žene' : 'Muškarci' }}</p>
           </div>
           <div class="stats">
-            <div><span class="stat" [class]="totalClass(r.total)">{{ r.total | toPar }}</span><span class="muted">Total</span></div>
-            <div><span class="stat">{{ r.rank ? (r.tied ? 'T' : '') + r.rank : '–' }}</span><span class="muted">Place</span></div>
-            <div><span class="stat">{{ r.counted }}</span><span class="muted">Weeks</span></div>
+            <div><span class="stat" [class]="totalClass(r.total)">{{ r.total | toPar }}</span><span class="muted">Ukupno</span></div>
+            <div><span class="stat">{{ r.rank ? (r.tied ? 'T' : '') + r.rank : '–' }}</span><span class="muted">Mjesto</span></div>
+            <div><span class="stat">{{ r.counted }}</span><span class="muted">Tjedni</span></div>
           </div>
         </header>
 
         @for (cell of cells(); track cell.week) {
           <article class="panel week" [class.faded]="cell.dropped || cell.pending">
             <div class="week-head">
-              <strong>Week {{ cell.week }}</strong>
+              <strong>Tjedan {{ cell.week }}</strong>
               <span class="chip">{{ typeLabel(cell.round.type) }}</span>
               @if (cell.pending) {
-                <span class="chip">Counts from week {{ cell.week }}</span>
+                <span class="chip">Broji se od {{ cell.week }}. tjedna</span>
               }
               @if (cell.dropped) {
-                <span class="chip">Dropped</span>
+                <span class="chip">Ne broji se</span>
               }
               <span class="spacer"></span>
               <span class="score" [class]="totalClass(cell.round.toPar)">{{ cell.round.toPar | toPar }}</span>
@@ -61,9 +61,9 @@ import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/forma
               }
             </div>
             <p class="muted meta">
-              Played {{ day(cell.round.playedAt) }}{{ cell.round.scoredBy && cell.round.scoredBy !== r.name ? ' · card kept by ' + cell.round.scoredBy : '' }}
+              Odigrano {{ day(cell.round.playedAt) }}{{ cell.round.scoredBy && cell.round.scoredBy !== r.name ? ' · zapisničar: ' + cell.round.scoredBy : '' }}
               @if (cell.replaced) {
-                · repeat; first try was {{ cell.replaced.toPar | toPar }} ({{ cell.replaced.strokes }})
+                · ponovljena; prvi pokušaj bio je {{ cell.replaced.toPar | toPar }} ({{ cell.replaced.strokes }})
               }
             </p>
           </article>

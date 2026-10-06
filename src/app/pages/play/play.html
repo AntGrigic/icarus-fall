@@ -4,25 +4,25 @@
   } @else if (!league()) {
     <div class="empty-state">
       <mat-icon>emoji_events</mat-icon>
-      <h2>No league yet</h2>
-      <p>An admin needs to create the league first.</p>
+      <h2>Još nema lige</h2>
+      <p>Admin prvo mora napraviti ligu.</p>
     </div>
   } @else {
     @if (cards.card(); as card) {
       <section class="resume panel">
         <div>
-          <h2>Round in progress</h2>
+          <h2>Runda u tijeku</h2>
           <p class="muted">
-            {{ card.players.length }} player{{ card.players.length > 1 ? 's' : '' }} ·
-            hole {{ card.holes[card.holeIndex]?.number }} ·
+            {{ card.players.length }} {{ plural(card.players.length, 'igrač', 'igrača', 'igrača') }} ·
+            koš {{ card.holes[card.holeIndex]?.number }} ·
             {{ card.players[0]?.name }}{{ card.players.length > 1 ? ' +' + (card.players.length - 1) : '' }}
           </p>
         </div>
         <div class="resume-actions">
-          <button mat-button (click)="discard()">Discard</button>
+          <button mat-button (click)="discard()">Odbaci</button>
           <a mat-flat-button routerLink="/play/card">
             <mat-icon>play_arrow</mat-icon>
-            Resume
+            Nastavi
           </a>
         </div>
       </section>
@@ -32,22 +32,22 @@
       @case ('upcoming') {
         <div class="empty-state">
           <mat-icon>event</mat-icon>
-          <h2>The league hasn't started</h2>
-          <p>{{ league()!.name }} starts on {{ startsOn() }}.</p>
+          <h2>Liga još nije počela</h2>
+          <p>{{ league()!.name }} počinje {{ startsOn() }}.</p>
         </div>
       }
       @case ('finished') {
         <div class="empty-state">
           <mat-icon>flag</mat-icon>
-          <h2>The season is over</h2>
-          <p>Check the final standings.</p>
-          <a mat-stroked-button routerLink="/standings">Standings</a>
+          <h2>Sezona je završila</h2>
+          <p>Pogledaj konačni poredak.</p>
+          <a mat-stroked-button routerLink="/standings">Poredak</a>
         </div>
       }
       @default {
         <header class="page-head">
           <div>
-            <h1>New round</h1>
+            <h1>Nova runda</h1>
             <p class="muted sub">{{ weekText() }}</p>
           </div>
         </header>
@@ -55,12 +55,13 @@
         @if (closedHoles().length) {
           <div class="notice">
             <mat-icon>warning_amber</mat-icon>
-            <span>Don't play hole{{ closedHoles().length > 1 ? 's' : '' }} {{ closedHoles().join(', ') }} this week. {{ closedHoles().length > 1 ? 'They are' : 'It is' }} left off the card.</span>
+            <span>Ovaj tjedan ne igraj {{ closedHoles().length > 1 ? 'koševe' : 'koš' }} {{ closedHoles().join(', ') }}. {{ closedHoles().length > 1 ? 'Nisu' : 'Nije' }} na scorecardu.</span>
           </div>
         }
 
         <p class="muted intro">
-          Add everyone in your flight. One person can keep score for the whole card. Each player picks which round they are playing.
+          Dodaj sve s kojima igraš. Jedna osoba može upisivati rezultate za cijeli scorecard. Svaki igrač bira koju rundu igra.
+          Redoslijed bacanja izvlači se nasumično na početku runde.
         </p>
 
         <section class="flight">
@@ -70,15 +71,15 @@
               <div class="player-head">
                 <span class="num">{{ i + 1 }}</span>
                 <strong class="pname">{{ name(d.player) }}</strong>
-                <span class="chip">{{ d.player.division === 'W' ? 'Women' : 'Men' }}</span>
+                <span class="chip">{{ d.player.division === 'W' ? 'Žene' : 'Muškarci' }}</span>
                 @if (i === 0) {
-                  <span class="chip keeper">Scorekeeper</span>
+                  <span class="chip keeper">Zapisničar</span>
                 }
-                <button mat-icon-button (click)="remove(d.player.id)" aria-label="Remove from card">
+                <button mat-icon-button (click)="remove(d.player.id)" aria-label="Ukloni sa scorecarda">
                   <mat-icon>close</mat-icon>
                 </button>
               </div>
-              <div class="options" role="radiogroup" [attr.aria-label]="'Round for ' + name(d.player)">
+              <div class="options" role="radiogroup" [attr.aria-label]="'Runda za ' + name(d.player)">
                 @for (o of options; track o.week + '-' + o.attempt) {
                   <button
                     type="button"
@@ -96,17 +97,17 @@
                     </span>
                   </button>
                 } @empty {
-                  <p class="muted">Nothing left to play this week.</p>
+                  <p class="muted">Ovaj tjedan nema više rundi za igranje.</p>
                 }
               </div>
               @if (!d.option && options.length) {
-                <p class="choose muted">Choose a round</p>
+                <p class="choose muted">Odaberi rundu</p>
               }
             </article>
           }
 
           <app-player-picker
-            [label]="drafts().length ? 'Add another player' : 'Who is playing?'"
+            [label]="drafts().length ? 'Dodaj još jednog igrača' : 'Tko igra?'"
             [exclude]="selectedIds()"
             [unavailable]="unavailable"
             (picked)="add($event)"
@@ -116,7 +117,7 @@
         <div class="start">
           <button mat-flat-button class="start-btn" [disabled]="!canStart()" (click)="start()">
             <mat-icon>sports</mat-icon>
-            Start round
+            Započni rundu
           </button>
         </div>
       }

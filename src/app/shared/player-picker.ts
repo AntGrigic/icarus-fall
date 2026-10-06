@@ -39,7 +39,7 @@ const NEW_PLAYER = '__new__';
           [matAutocomplete]="auto"
           [value]="query()"
           (input)="query.set($any($event.target).value)"
-          placeholder="Start typing your name"
+          placeholder="Počni upisivati ime"
           autocomplete="off"
         />
         <mat-autocomplete
@@ -56,31 +56,31 @@ const NEW_PLAYER = '__new__';
           }
           <mat-option [value]="newPlayer" class="new-option">
             <mat-icon>person_add</mat-icon>
-            First time? Add {{ query().trim() ? '"' + query().trim() + '"' : 'a new player' }}
+            Prvi put? Dodaj {{ query().trim() ? '"' + query().trim() + '"' : 'novog igrača' }}
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
     } @else {
       <form class="new-player panel" (ngSubmit)="create()">
-        <h3>New player</h3>
+        <h3>Novi igrač</h3>
         <div class="fields">
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>First name</mat-label>
+            <mat-label>Ime</mat-label>
             <input matInput name="firstName" [(ngModel)]="firstName" required autocomplete="given-name" />
           </mat-form-field>
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Last name</mat-label>
+            <mat-label>Prezime</mat-label>
             <input matInput name="lastName" [(ngModel)]="lastName" required autocomplete="family-name" />
           </mat-form-field>
         </div>
         <app-division-switch [(value)]="division" />
         @if (existing(); as e) {
-          <p class="muted hint">{{ name(e) }} is already registered and will be added.</p>
+          <p class="muted hint">Igrač {{ name(e) }} već postoji i bit će dodan.</p>
         }
         <div class="actions">
-          <button mat-button type="button" (click)="cancel()">Cancel</button>
+          <button mat-button type="button" (click)="cancel()">Odustani</button>
           <button mat-flat-button type="submit" [disabled]="!firstName().trim() || !lastName().trim()">
-            Add player
+            Dodaj igrača
           </button>
         </div>
       </form>
@@ -121,7 +121,7 @@ const NEW_PLAYER = '__new__';
 export class PlayerPicker {
   private readonly store = inject(DataStore);
 
-  readonly label = input('Add player');
+  readonly label = input('Dodaj igrača');
   /** Players already chosen; they are hidden from the list. */
   readonly exclude = input<string[]>([]);
   /** Returns why a player can't be picked (shown greyed out), or null. */

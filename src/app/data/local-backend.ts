@@ -47,7 +47,7 @@ export class LocalBackend implements Backend {
     // Same rule as Firestore: a filled slot can't be overwritten, and nothing is saved if one is taken.
     const weeks = this.db.rounds[leagueId] ?? {};
     if (rounds.some((r) => weeks[r.week]?.[roundKey(r.playerId, r.attempt)])) {
-      return Promise.reject(Object.assign(new Error('Round already saved'), { code: 'permission-denied' }));
+      return Promise.reject(Object.assign(new Error('Runda je već spremljena'), { code: 'permission-denied' }));
     }
     return this.commit((db) => {
       for (const r of rounds) ((db.rounds[leagueId] ??= {})[r.week] ??= {})[roundKey(r.playerId, r.attempt)] = r;
@@ -106,7 +106,7 @@ export class LocalBackend implements Backend {
 
   private admin(mutate: (db: LocalDb) => void): Promise<void> {
     if (!this.isAdmin) {
-      return Promise.reject(Object.assign(new Error('Admins only'), { code: 'permission-denied' }));
+      return Promise.reject(Object.assign(new Error('Samo za admine'), { code: 'permission-denied' }));
     }
     return this.commit(mutate);
   }

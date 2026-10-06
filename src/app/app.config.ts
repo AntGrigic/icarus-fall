@@ -17,14 +17,14 @@ import { provideServiceWorker } from '@angular/service-worker';
 
 import { routes } from './app.routes';
 
-/** Browser tab shows "Standings · Icarus Fall". */
+/** Browser tab shows "Standings · Jupiter shades". */
 @Injectable({ providedIn: 'root' })
 class AppTitleStrategy extends TitleStrategy {
   private readonly title = inject(Title);
 
   override updateTitle(snapshot: RouterStateSnapshot): void {
     const page = this.buildTitle(snapshot);
-    this.title.setTitle(page ? `${page} · Icarus Fall` : 'Icarus Fall');
+    this.title.setTitle(page ? `${page} · Jupiter shades` : 'Jupiter shades');
   }
 }
 

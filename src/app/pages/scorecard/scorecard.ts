@@ -11,7 +11,7 @@ import { Round } from '../../core/models';
 import { DataStore, describeError, SaveResult } from '../../data/data-store';
 import { CardPlayer, CardService } from '../../play/card.service';
 import { Confirm } from '../../shared/confirm';
-import { scoreClass, ToParPipe, totalClass } from '../../shared/format';
+import { plural, scoreClass, ToParPipe, totalClass } from '../../shared/format';
 
 const MAX_STROKES = 20;
 
@@ -158,9 +158,9 @@ export class ScorecardPage {
 
   protected async discard(): Promise<void> {
     const ok = await this.confirm.ask({
-      title: 'Discard round?',
-      message: 'All scores on this card will be lost.',
-      confirmText: 'Discard',
+      title: 'Odbaciti rundu?',
+      message: 'Svi rezultati na ovom scorecardu bit će izgubljeni.',
+      confirmText: 'Odbaci',
       danger: true,
     });
     if (ok) this.cards.discard();
@@ -187,13 +187,13 @@ export class ScorecardPage {
   private problemFor(p: CardPlayer): string | null {
     const card = this.card()!;
     const missing = card.holes.filter((_, i) => this.score(p, i) == null).length;
-    if (missing) return `${missing} hole${missing > 1 ? 's' : ''} without a score.`;
-    if (this.store.activeLeague()?.id !== card.leagueId) return 'The active league changed. Ask the admin.';
+    if (missing) return `${missing} ${plural(missing, 'koš', 'koša', 'koševa')} bez rezultata.`;
+    if (this.store.activeLeague()?.id !== card.leagueId) return 'Aktivna liga se promijenila. Javi se adminu.';
     const options = this.optionsFor(p);
     if (!options.some((o) => sameSlot(o, p.option))) {
       return options.length
-        ? `${p.option.label} for week ${p.option.week} is already saved. Choose another round.`
-        : 'Nothing left to play this week. Remove this player from the card.';
+        ? `${p.option.label} za ${p.option.week}. tjedan već je spremljena. Odaberi drugu rundu.`
+        : 'Ovaj tjedan nema više rundi za igranje. Ukloni igrača sa scorecarda.';
     }
     return null;
   }

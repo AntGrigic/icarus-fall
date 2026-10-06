@@ -61,9 +61,9 @@ export class AdminPage {
   protected async copyUid(uid: string): Promise<void> {
     try {
       await navigator.clipboard.writeText(uid);
-      this.snackBar.open('UID copied', undefined, { duration: 2000 });
+      this.snackBar.open('UID je kopiran', undefined, { duration: 2000 });
     } catch {
-      this.snackBar.open('Could not copy. Select the UID and copy it by hand.', undefined, { duration: 4000 });
+      this.snackBar.open('Kopiranje nije uspjelo. Označi UID i kopiraj ga ručno.', undefined, { duration: 4000 });
     }
   }
 
@@ -74,9 +74,9 @@ export class AdminPage {
 
   protected async resetDemo(): Promise<void> {
     const ok = await this.confirm.ask({
-      title: 'Reset demo data?',
-      message: 'All leagues, players and rounds in this browser are replaced with the sample league.',
-      confirmText: 'Reset',
+      title: 'Resetirati demo podatke?',
+      message: 'Sve lige, igrači i runde u ovom pregledniku bit će zamijenjeni primjerom lige.',
+      confirmText: 'Resetiraj',
       danger: true,
     });
     if (ok) {

@@ -17,9 +17,9 @@ export interface ConfirmOptions {
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>{{ data.message }}</mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button [mat-dialog-close]="false">Cancel</button>
+      <button mat-button [mat-dialog-close]="false">Odustani</button>
       <button mat-flat-button [class.danger]="data.danger" [mat-dialog-close]="true" cdkFocusInitial>
-        {{ data.confirmText ?? 'OK' }}
+        {{ data.confirmText ?? 'U redu' }}
       </button>
     </mat-dialog-actions>
   `,

@@ -7,7 +7,7 @@ import { Division, DIVISIONS } from '../core/models';
   selector: 'app-division-switch',
   host: {
     role: 'radiogroup',
-    'aria-label': 'Division',
+    'aria-label': 'Kategorija',
     '[style.--count]': 'divisions.length',
     '[style.--active]': 'activeIndex()',
   },

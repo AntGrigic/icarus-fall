@@ -177,14 +177,14 @@ export function roundOptions(league: League, week: number, playerRounds: Round[]
 
   const first = find(week, 1);
   if (!first) {
-    options.push({ week, attempt: 1, type: 'first', label: 'First round', hint: `Week ${week}` });
+    options.push({ week, attempt: 1, type: 'first', label: 'Prva runda', hint: `Tjedan ${week}` });
   } else if (!find(week, 2)) {
     options.push({
       week,
       attempt: 2,
       type: 'repeat',
-      label: 'Repeat round',
-      hint: `Week ${week} · replaces ${formatToPar(first.toPar)}`,
+      label: 'Ponovljena runda',
+      hint: `Tjedan ${week} · zamjenjuje ${formatToPar(first.toPar)}`,
     });
   }
 
@@ -192,14 +192,14 @@ export function roundOptions(league: League, week: number, playerRounds: Round[]
   if (next <= league.totalWeeks) {
     const advance = find(next, 1);
     if (!advance) {
-      options.push({ week: next, attempt: 1, type: 'advance', label: 'Round in advance', hint: `Week ${next}` });
+      options.push({ week: next, attempt: 1, type: 'advance', label: 'Runda unaprijed', hint: `Tjedan ${next}` });
     } else if (!find(next, 2)) {
       options.push({
         week: next,
         attempt: 2,
         type: 'repeat',
-        label: 'Repeat advance round',
-        hint: `Week ${next} · replaces ${formatToPar(advance.toPar)}`,
+        label: 'Ponovljena runda unaprijed',
+        hint: `Tjedan ${next} · zamjenjuje ${formatToPar(advance.toPar)}`,
       });
     }
   }
@@ -209,11 +209,11 @@ export function roundOptions(league: League, week: number, playerRounds: Round[]
 export function roundTypeLabel(type: RoundType): string {
   switch (type) {
     case 'first':
-      return 'First round';
+      return 'Prva runda';
     case 'advance':
-      return 'In advance';
+      return 'Unaprijed';
     case 'repeat':
-      return 'Repeat';
+      return 'Ponovljena';
   }
 }
 

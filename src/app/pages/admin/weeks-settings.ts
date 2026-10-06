@@ -14,23 +14,23 @@ import { formatRange } from '../../shared/format';
   template: `
     <div class="weeks">
       <p class="muted help">
-        Tap a hole to close it for that week. Closed holes are left off the scorecard for rounds started
-        during that week. Rounds already saved don't change, and standings compare scores to par,
-        so a shorter round is still fair.
+        Dodirni koš da ga zatvoriš za taj tjedan. Zatvoreni koševi neće biti na scorecardu za runde
+        započete tog tjedna. Već spremljene runde se ne mijenjaju, a poredak uspoređuje rezultate s parom,
+        pa je i kraća runda poštena.
       </p>
       @for (w of weeks(); track w.week) {
         <section class="panel week" [class.current]="w.week === current().week && current().status === 'running'">
           <div class="week-head">
-            <strong>Week {{ w.week }}</strong>
+            <strong>Tjedan {{ w.week }}</strong>
             <span class="muted">{{ w.range }}</span>
             @if (w.week === current().week && current().status === 'running') {
-              <span class="chip">This week</span>
+              <span class="chip">Ovaj tjedan</span>
             }
             <span class="spacer"></span>
             @if (w.closed.length) {
-              <span class="closed-text">Closed: {{ w.closed.join(', ') }}</span>
+              <span class="closed-text">Zatvoreni: {{ w.closed.join(', ') }}</span>
             } @else {
-              <span class="muted">All holes open</span>
+              <span class="muted">Svi koševi su otvoreni</span>
             }
           </div>
           <div class="holes">
@@ -43,7 +43,7 @@ import { formatRange } from '../../shared/format';
                 [disabled]="busy()"
                 (click)="toggle(w.week, h.number)"
                 [attr.aria-pressed]="closed"
-                [attr.aria-label]="'Hole ' + h.number + (closed ? ' closed' : ' open')"
+                [attr.aria-label]="'Koš ' + h.number + (closed ? ' zatvoren' : ' otvoren')"
               >
                 @if (closed) {
                   <mat-icon>block</mat-icon>
@@ -100,7 +100,7 @@ export class WeeksSettings {
     if (closed.has(hole)) closed.delete(hole);
     else closed.add(hole);
     if (closed.size >= league.holes.length) {
-      this.snackBar.open('At least one hole has to stay open.', undefined, { duration: 3000 });
+      this.snackBar.open('Barem jedan koš mora ostati otvoren.', undefined, { duration: 3000 });
       return;
     }
 

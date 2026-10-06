@@ -12,7 +12,7 @@ import { newId } from '../../core/ids';
 import { currentWeek, toYmd, weekRange } from '../../core/league-math';
 import { League, WeekSettings } from '../../core/models';
 import { DataStore, describeError } from '../../data/data-store';
-import { formatRange } from '../../shared/format';
+import { formatRange, plural } from '../../shared/format';
 
 interface Draft {
   id: string | null;
@@ -64,6 +64,7 @@ export class LeagueSettings {
   protected readonly isNew = computed(() => !this.league());
   protected readonly isActive = computed(() => this.league()?.id === this.store.activeLeague()?.id);
   protected readonly parOptions = [2, 3, 4, 5, 6];
+  protected readonly plural = plural;
 
   protected weekNumbers(d: Draft): number[] {
     return Array.from({ length: Math.max(0, d.totalWeeks || 0) }, (_, i) => i + 1);
@@ -72,9 +73,9 @@ export class LeagueSettings {
   protected autoWeekText(d: Draft): string {
     if (!d.startDate || !d.totalWeeks) return '';
     const info = currentWeek(this.fromDraft({ ...d, override: 0 }), this.store.now());
-    if (info.status === 'upcoming') return 'not started yet';
-    if (info.status === 'finished') return 'finished';
-    return `week ${info.week}`;
+    if (info.status === 'upcoming') return 'još nije počela';
+    if (info.status === 'finished') return 'završila';
+    return `tjedan ${info.week}`;
   }
 
   protected lastWeekText(d: Draft): string {
@@ -108,7 +109,7 @@ export class LeagueSettings {
       if (this.isNew() && (this.makeActive() || !this.store.activeLeague())) {
         await this.store.setActiveLeague(league.id);
       }
-      this.snackBar.open(this.isNew() ? 'League created' : 'League saved', undefined, { duration: 2500 });
+      this.snackBar.open(this.isNew() ? 'Liga je napravljena' : 'Liga je spremljena', undefined, { duration: 2500 });
       this.saved.emit(league);
     } catch (e) {
       this.errors.set([describeError(e)]);
@@ -122,7 +123,7 @@ export class LeagueSettings {
     if (!league) return;
     try {
       await this.store.setActiveLeague(league.id);
-      this.snackBar.open(`${league.name} is now the active league`, undefined, { duration: 2500 });
+      this.snackBar.open(`${league.name} je sada aktivna liga`, undefined, { duration: 2500 });
     } catch (e) {
       this.store.reportError(e);
     }
@@ -130,15 +131,15 @@ export class LeagueSettings {
 
   private validate(d: Draft): string[] {
     const errors: string[] = [];
-    if (!d.name.trim()) errors.push('Give the league a name.');
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(d.startDate)) errors.push('Pick the start date.');
+    if (!d.name.trim()) errors.push('Upiši naziv lige.');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d.startDate)) errors.push('Odaberi datum početka.');
     if (!Number.isInteger(d.totalWeeks) || d.totalWeeks < 1 || d.totalWeeks > 52) {
-      errors.push('Number of weeks must be between 1 and 52.');
+      errors.push('Broj tjedana mora biti između 1 i 52.');
     }
     if (!Number.isInteger(d.dropWorst) || d.dropWorst < 0 || d.dropWorst >= d.totalWeeks) {
-      errors.push('Dropped weeks must be at least 0 and less than the number of weeks.');
+      errors.push('Broj odbačenih tjedana mora biti najmanje 0 i manji od broja tjedana.');
     }
-    if (!d.pars.length) errors.push('The course needs at least one hole.');
+    if (!d.pars.length) errors.push('Staza mora imati barem jedan koš.');
     return errors;
   }
 
@@ -160,7 +161,7 @@ export class LeagueSettings {
     const template = this.store.activeLeague();
     return {
       id: null,
-      name: `League ${new Date().getFullYear()}`,
+      name: `Liga ${new Date().getFullYear()}`,
       startDate: toYmd(new Date()),
       totalWeeks: template?.totalWeeks ?? 8,
       dropWorst: template?.dropWorst ?? 0,

@@ -4,9 +4,9 @@
   } @else if (!league()) {
     <div class="empty-state">
       <mat-icon>emoji_events</mat-icon>
-      <h2>No league yet</h2>
-      <p>An admin needs to create the first league.</p>
-      <a mat-stroked-button routerLink="/admin">Go to admin</a>
+      <h2>Još nema lige</h2>
+      <p>Admin prvo mora napraviti ligu.</p>
+      <a mat-stroked-button routerLink="/admin">Otvori admin</a>
     </div>
   } @else {
     <header class="page-head">
@@ -16,7 +16,7 @@
             class="league-select"
             [value]="league()!.id"
             (valueChange)="store.viewedLeagueId.set($event)"
-            aria-label="League"
+            aria-label="Liga"
           >
             @for (l of store.sortedLeagues(); track l.id) {
               <mat-option [value]="l.id">{{ l.name }}</mat-option>
@@ -30,7 +30,7 @@
       @if (isActiveLeague() && standings()?.info?.status === 'running') {
         <a mat-flat-button routerLink="/play">
           <mat-icon>edit_note</mat-icon>
-          Enter scores
+          Upiši rezultate
         </a>
       }
     </header>
@@ -39,8 +39,8 @@
       <div class="notice">
         <mat-icon>warning_amber</mat-icon>
         <span>
-          Hole{{ closedHoles().length > 1 ? 's' : '' }} {{ closedHoles().join(', ') }}
-          {{ closedHoles().length > 1 ? 'are' : 'is' }} closed this week.
+          {{ closedHoles().length > 1 ? 'Koševi' : 'Koš' }} {{ closedHoles().join(', ') }}
+          {{ closedHoles().length > 1 ? 'su zatvoreni' : 'je zatvoren' }} ovaj tjedan.
         </span>
       </div>
     }
@@ -57,8 +57,8 @@
     } @else if (!standings()!.rows.length) {
       <div class="empty-state">
         <mat-icon>sports</mat-icon>
-        <h2>No rounds yet</h2>
-        <p>Scores show up here as soon as the first card is submitted.</p>
+        <h2>Još nema rundi</h2>
+        <p>Rezultati se pojavljuju ovdje čim se pošalje prvi scorecard.</p>
       </div>
     } @else {
       @let s = standings()!;
@@ -67,9 +67,9 @@
           <thead>
             <tr>
               <th class="pos">#</th>
-              <th class="name">Player</th>
-              <th class="total">Total</th>
-              <th class="wks" title="Weeks counted">Wks</th>
+              <th class="name">Igrač</th>
+              <th class="total">Ukupno</th>
+              <th class="wks" title="Tjedni koji se broje">Tj.</th>
               @for (w of weeks(); track w) {
                 <th class="wk" [class.current]="w === s.info.week && s.info.status === 'running'">{{ w }}</th>
               }
@@ -92,19 +92,19 @@
                     [class.pending]="cell?.pending"
                     [title]="
                       cell
-                        ? cell.round.strokes + ' strokes' +
-                          (cell.replaced ? ' · repeat (first try ' + (cell.replaced.toPar | toPar) + ')' : '') +
-                          (cell.pending ? ' · played in advance' : '') +
-                          (cell.dropped ? ' · dropped' : '')
+                        ? cell.round.strokes + ' ' + plural(cell.round.strokes, 'bacanje', 'bacanja', 'bacanja') +
+                          (cell.replaced ? ' · ponovljena (prvi pokušaj ' + (cell.replaced.toPar | toPar) + ')' : '') +
+                          (cell.pending ? ' · odigrana unaprijed' : '') +
+                          (cell.dropped ? ' · ne broji se' : '')
                         : ''
                     "
                   >
                     @if (cell) {
                       <span [class]="totalClass(cell.round.toPar)">{{ cell.round.toPar | toPar }}</span>
                       @if (cell.replaced) {
-                        <sup>R</sup>
+                        <sup>P</sup>
                       } @else if (cell.round.type === 'advance') {
-                        <sup>A</sup>
+                        <sup>U</sup>
                       }
                     } @else {
                       <span class="none">·</span>
@@ -118,11 +118,10 @@
       </div>
 
       <ul class="legend muted">
-        <li><sup>R</sup> repeat round (replaces the first try)</li>
-        <li><sup>A</sup> played in advance</li>
-        <li><span class="sample pending">−2</span> counts once its week starts</li>
+        <li><sup>P</sup> ponovljena runda (zamjenjuje prvi pokušaj)</li>
+        <li><sup>U</sup> odigrano unaprijed</li>
         @if (league()!.dropWorst) {
-          <li><span class="sample dropped">+6</span> dropped week</li>
+          <li><span class="sample dropped">+6</span> tjedan koji se ne broji</li>
         }
       </ul>
     }

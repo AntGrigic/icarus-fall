@@ -170,7 +170,7 @@ export class DataStore {
 
   playerName(id: string): string {
     const p = this.players().find((x) => x.id === id);
-    return p ? fullName(p) : 'Unknown player';
+    return p ? fullName(p) : 'Nepoznat igrač';
   }
 
   reportError(error: unknown): void {
@@ -186,15 +186,15 @@ export class DataStore {
 export function describeError(error: unknown): string {
   const code = (error as { code?: string })?.code ?? '';
   if (code === 'permission-denied') {
-    return 'Not allowed. Someone may already have saved this round, or you are not an admin.';
+    return 'Nije dopušteno. Netko je možda već spremio ovu rundu ili nisi admin.';
   }
   if (code === 'auth/admin-restricted-operation' || code === 'auth/operation-not-allowed') {
-    return 'This sign-in method is turned off. Enable Anonymous and Google in Firebase → Authentication → Sign-in method.';
+    return 'Ovaj način prijave je isključen. Uključi Anonymous i Google u Firebase → Authentication → Sign-in method.';
   }
-  if (code === 'auth/popup-blocked') return 'The browser blocked the Google pop-up. Allow pop-ups for this site and try again.';
+  if (code === 'auth/popup-blocked') return 'Preglednik je blokirao Google skočni prozor. Dopusti skočne prozore za ovu stranicu i pokušaj ponovno.';
   if (code === 'auth/unauthorized-domain') {
-    return `${location.hostname} may not sign in yet. Add it in Firebase → Authentication → Settings → Authorized domains.`;
+    return `${location.hostname} još nema dopuštenje za prijavu. Dodaj ga u Firebase → Authentication → Settings → Authorized domains.`;
   }
-  if (code === 'unavailable') return 'No connection. Changes will sync when you are back online.';
-  return (error as Error)?.message || 'Something went wrong.';
+  if (code === 'unavailable') return 'Nema veze. Promjene će se spremiti kad se veza vrati.';
+  return (error as Error)?.message || 'Nešto je pošlo po zlu.';
 }

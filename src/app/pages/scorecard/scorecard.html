@@ -3,66 +3,66 @@
     <div class="done-icon" [class.queued]="done.result === 'queued'">
       <mat-icon>{{ done.result === 'saved' ? 'check' : 'cloud_upload' }}</mat-icon>
     </div>
-    <h1>{{ done.result === 'saved' ? 'Scores saved' : 'Saved on this phone' }}</h1>
+    <h1>{{ done.result === 'saved' ? 'Rezultati su spremljeni' : 'Spremljeno na ovom mobitelu' }}</h1>
     <p class="muted">
       @if (done.result === 'saved') {
-        The standings are updated.
+        Poredak je ažuriran.
       } @else {
-        No signal right now. The scores upload automatically when you're back online. Keep the app open or reopen it later.
+        Trenutno nema signala. Rezultati će se poslati automatski kad se veza vrati. Ostavi aplikaciju otvorenu ili je kasnije ponovno otvori.
       }
     </p>
     <ul class="done-list panel">
       @for (r of done.rounds; track r.playerId) {
         <li>
           <span class="dname">{{ r.playerName }}</span>
-          <span class="muted">Week {{ r.week }} · {{ r.type === 'first' ? 'First round' : r.type === 'advance' ? 'In advance' : 'Repeat' }}</span>
+          <span class="muted">Tjedan {{ r.week }} · {{ r.type === 'first' ? 'Prva runda' : r.type === 'advance' ? 'Unaprijed' : 'Ponovljena' }}</span>
           <span class="dscore" [class]="totalClass(r.toPar)">{{ r.toPar | toPar }}</span>
           <span class="muted">{{ r.strokes }}</span>
         </li>
       }
     </ul>
     <div class="done-actions">
-      <a mat-stroked-button routerLink="/play">New round</a>
-      <a mat-flat-button routerLink="/standings">View standings</a>
+      <a mat-stroked-button routerLink="/play">Nova runda</a>
+      <a mat-flat-button routerLink="/standings">Pogledaj poredak</a>
     </div>
   </div>
 } @else if (card(); as c) {
   @if (view() === 'hole' && hole(); as h) {
     <div class="page narrow hole-page">
       <header class="hole-head">
-        <button mat-icon-button (click)="prev()" [disabled]="index() === 0" aria-label="Previous hole">
+        <button mat-icon-button (click)="prev()" [disabled]="index() === 0" aria-label="Prethodni koš">
           <mat-icon>chevron_left</mat-icon>
         </button>
         <div class="hole-title">
-          <span class="hole-no">Hole {{ h.number }}</span>
+          <span class="hole-no">Koš {{ h.number }}</span>
           <span class="hole-par">Par {{ h.par }} · {{ index() + 1 }}/{{ c.holes.length }}</span>
         </div>
-        <button mat-icon-button (click)="next()" aria-label="Next hole">
+        <button mat-icon-button (click)="next()" aria-label="Sljedeći koš">
           <mat-icon>chevron_right</mat-icon>
         </button>
-        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Card options">
+        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Opcije scorecarda">
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #menu="matMenu">
           <button mat-menu-item (click)="review()">
             <mat-icon>fact_check</mat-icon>
-            <span>Review card</span>
+            <span>Pregledaj scorecard</span>
           </button>
           <button mat-menu-item (click)="discard()">
             <mat-icon>delete</mat-icon>
-            <span>Discard round</span>
+            <span>Odbaci rundu</span>
           </button>
         </mat-menu>
       </header>
 
-      <nav class="hole-strip" aria-label="Holes">
+      <nav class="hole-strip" aria-label="Koševi">
         @for (hh of c.holes; track hh.number; let i = $index) {
           <button
             class="dot"
             [class.active]="i === index()"
             [class.done]="holeDone(i)"
             (click)="goToHole(i)"
-            [attr.aria-label]="'Hole ' + hh.number"
+            [attr.aria-label]="'Koš ' + hh.number"
           >
             {{ hh.number }}
           </button>
@@ -77,10 +77,10 @@
               <span class="pname">{{ p.name }}</span>
               <span class="ptotal">
                 <span [class]="totalClass(toPar(p))">{{ thru(p) ? (toPar(p) | toPar) : '–' }}</span>
-                <span class="muted"> · thru {{ thru(p) }}</span>
+                <span class="muted"> · nakon {{ thru(p) }}</span>
               </span>
             </div>
-            <button class="step" (click)="change(p, -1)" [attr.aria-label]="'One less for ' + p.name">
+            <button class="step" (click)="change(p, -1)" [attr.aria-label]="'Jedno manje za ' + p.name">
               <mat-icon>remove</mat-icon>
             </button>
             <button
@@ -88,28 +88,26 @@
               [class.unset]="s === null"
               [class]="s !== null ? scoreClass(s - h.par) : ''"
               (click)="confirmPar(p)"
-              [attr.aria-label]="p.name + ' strokes'"
+              [attr.aria-label]="'Bacanja za ' + p.name"
             >
               {{ s ?? h.par }}
             </button>
-            <button class="step" (click)="change(p, 1)" [attr.aria-label]="'One more for ' + p.name">
+            <button class="step" (click)="change(p, 1)" [attr.aria-label]="'Jedno više za ' + p.name">
               <mat-icon>add</mat-icon>
             </button>
           </div>
         }
       </section>
 
-      <p class="muted tip">Grey numbers are par. Untouched scores become par when you go to the next hole.</p>
-
       <div class="hole-actions">
         @if (isLast()) {
           <button mat-flat-button class="big" (click)="next()">
             <mat-icon>fact_check</mat-icon>
-            Review & finish
+            Pregledaj i završi
           </button>
         } @else {
           <button mat-flat-button class="big" (click)="next()">
-            Next hole
+            Sljedeći koš
             <mat-icon iconPositionEnd>arrow_forward</mat-icon>
           </button>
         }
@@ -119,8 +117,8 @@
     <div class="page narrow review">
       <header class="page-head">
         <div>
-          <h1>Review card</h1>
-          <p class="muted sub">Check every score, then submit. Tap a hole to fix it.</p>
+          <h1>Pregledaj scorecard</h1>
+          <p class="muted sub">Provjeri sve rezultate pa ih pošalji. Dodirni koš da ga ispraviš.</p>
         </div>
       </header>
 
@@ -142,15 +140,15 @@
                 class="option-select"
                 [value]="optionKey(p.option)"
                 (valueChange)="setOption(p, $event)"
-                [aria-label]="'Round for ' + p.name"
-                placeholder="Choose a round"
+                [aria-label]="'Runda za ' + p.name"
+                placeholder="Odaberi rundu"
               >
                 @for (o of options; track optionKey(o)) {
                   <mat-option [value]="optionKey(o)">{{ o.label }} · {{ o.hint }}</mat-option>
                 }
               </mat-select>
             } @else {
-              <span class="muted">{{ p.option.label }} · week {{ p.option.week }}</span>
+              <span class="muted">{{ p.option.label }} · tjedan {{ p.option.week }}</span>
             }
           </div>
 
@@ -169,7 +167,7 @@
               <mat-icon>error_outline</mat-icon>
               {{ problem }}
               @if (!options.length) {
-                <button mat-button (click)="removePlayer(p)">Remove</button>
+                <button mat-button (click)="removePlayer(p)">Ukloni</button>
               }
             </p>
           }
@@ -183,7 +181,7 @@
       <div class="review-actions">
         <button mat-stroked-button (click)="goToHole(index())">
           <mat-icon>arrow_back</mat-icon>
-          Back to holes
+          Natrag na koševe
         </button>
         <button mat-flat-button class="big" [disabled]="!canSubmit() || saving()" (click)="submit()">
           @if (saving()) {
@@ -191,7 +189,7 @@
           } @else {
             <mat-icon>send</mat-icon>
           }
-          Submit scores
+          Pošalji rezultate
         </button>
       </div>
     </div>

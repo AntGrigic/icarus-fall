@@ -21,15 +21,15 @@ export class App {
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly nav = [
-    { path: '/standings', icon: 'leaderboard', label: 'Standings' },
-    { path: '/play', icon: 'edit_note', label: 'Play' },
+    { path: '/standings', icon: 'leaderboard', label: 'Poredak' },
+    { path: '/play', icon: 'edit_note', label: 'Igraj' },
     { path: '/admin', icon: 'admin_panel_settings', label: 'Admin' },
   ];
 
   constructor() {
     effect(() => {
       const error = this.store.lastError();
-      if (error) this.snackBar.open(error.message, 'OK', { duration: 8000 });
+      if (error) this.snackBar.open(error.message, 'U redu', { duration: 8000 });
     });
 
     const updates = inject(SwUpdate);
@@ -37,7 +37,7 @@ export class App {
       updates.versionUpdates.subscribe((event) => {
         if (event.type !== 'VERSION_READY') return;
         this.snackBar
-          .open('A new version of the app is ready.', 'Reload')
+          .open('Dostupna je nova verzija aplikacije.', 'Osvježi')
           .onAction()
           .subscribe(() => document.location.reload());
       });
