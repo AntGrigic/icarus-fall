@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router, RouterLink } from '@angular/router';
 
 import { newId } from '../../core/ids';
@@ -30,7 +29,7 @@ interface Draft {
 /** Set up a card: who is in the flight and which round each of them is playing. */
 @Component({
   selector: 'app-play',
-  imports: [RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule, PlayerPicker],
+  imports: [RouterLink, MatButtonModule, MatIconModule, PlayerPicker],
   templateUrl: './play.html',
   styleUrl: './play.scss',
 })

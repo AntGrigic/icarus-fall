@@ -1,6 +1,6 @@
 <div class="page narrow">
   @if (!store.ready() || (league() && !store.activeRounds())) {
-    <div class="loading"><mat-spinner diameter="40" /></div>
+    <div class="loading"><span class="orbit-loader" role="progressbar" aria-label="Učitavanje"></span></div>
   } @else if (!league()) {
     <div class="empty-state">
       <mat-icon>emoji_events</mat-icon>
@@ -10,7 +10,8 @@
   } @else {
     @if (cards.card(); as card) {
       <section class="resume panel">
-        <div>
+        <div class="resume-icon"><mat-icon>sports</mat-icon></div>
+        <div class="resume-text">
           <h2>Runda u tijeku</h2>
           <p class="muted">
             {{ card.players.length }} {{ plural(card.players.length, 'igrač', 'igrača', 'igrača') }} ·
@@ -67,14 +68,18 @@
         <section class="flight">
           @for (d of drafts(); track d.player.id; let i = $index) {
             @let options = optionsFor(d.player);
-            <article class="player panel">
+            <article class="player panel" [class.ready]="!!d.option">
               <div class="player-head">
                 <span class="num">{{ i + 1 }}</span>
-                <strong class="pname">{{ name(d.player) }}</strong>
-                <span class="chip">{{ d.player.division === 'W' ? 'Žene' : 'Muškarci' }}</span>
-                @if (i === 0) {
-                  <span class="chip keeper">Zapisničar</span>
-                }
+                <div class="pinfo">
+                  <strong class="pname">{{ name(d.player) }}</strong>
+                  <span class="tags">
+                    <span class="chip">{{ d.player.division === 'W' ? 'Žene' : 'Muškarci' }}</span>
+                    @if (i === 0) {
+                      <span class="chip keeper"><mat-icon>edit</mat-icon> Zapisničar</span>
+                    }
+                  </span>
+                </div>
                 <button mat-icon-button (click)="remove(d.player.id)" aria-label="Ukloni sa scorecarda">
                   <mat-icon>close</mat-icon>
                 </button>
@@ -90,7 +95,9 @@
                     [attr.aria-checked]="!!d.option && sameSlot(d.option, o)"
                     (click)="choose(d.player.id, o)"
                   >
-                    <mat-icon>{{ o.type === 'first' ? 'play_circle' : o.type === 'advance' ? 'fast_forward' : 'replay' }}</mat-icon>
+                    <span class="option-icon">
+                      <mat-icon>{{ o.type === 'first' ? 'play_circle' : o.type === 'advance' ? 'fast_forward' : 'replay' }}</mat-icon>
+                    </span>
                     <span class="option-text">
                       <span class="option-label">{{ o.label }}</span>
                       <span class="option-hint">{{ o.hint }}</span>
@@ -101,12 +108,13 @@
                 }
               </div>
               @if (!d.option && options.length) {
-                <p class="choose muted">Odaberi rundu</p>
+                <p class="choose">Odaberi rundu</p>
               }
             </article>
           }
 
           <app-player-picker
+            class="picker"
             [label]="drafts().length ? 'Dodaj još jednog igrača' : 'Tko igra?'"
             [exclude]="selectedIds()"
             [unavailable]="unavailable"
