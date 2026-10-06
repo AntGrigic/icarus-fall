@@ -70,7 +70,7 @@
       </nav>
 
       <section class="rows">
-        @for (p of c.players; track p.playerId) {
+        @for (p of throwers(); track p.playerId) {
           @let s = score(p, index());
           <div class="score-row">
             <div class="who">

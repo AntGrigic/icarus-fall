@@ -6,7 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { Router, RouterLink } from '@angular/router';
 
-import { RoundOption, roundOptions, sameSlot } from '../../core/league-math';
+import { RoundOption, roundOptions, sameSlot, throwingOrder } from '../../core/league-math';
 import { Round } from '../../core/models';
 import { DataStore, describeError, SaveResult } from '../../data/data-store';
 import { CardPlayer, CardService } from '../../play/card.service';
@@ -46,6 +46,16 @@ export class ScorecardPage {
   protected readonly index = computed(() => this.card()?.holeIndex ?? 0);
   protected readonly hole = computed(() => this.card()?.holes[this.index()] ?? null);
   protected readonly isLast = computed(() => this.index() === (this.card()?.holes.length ?? 0) - 1);
+
+  /** Players in throwing order for the hole on screen. */
+  protected readonly throwers = computed(() => {
+    const card = this.card();
+    if (!card) return [];
+    const byId = new Map(card.players.map((p) => [p.playerId, p]));
+    // Cards started before the order was drawn at random keep the order players were added in.
+    const start = card.startOrder ?? card.players.map((p) => p.playerId);
+    return throwingOrder(start, card.scores, this.index()).flatMap((id) => byId.get(id) ?? []);
+  });
 
   /** Why each player's round can't be submitted yet (null = ready). */
   protected readonly problems = computed(() => {

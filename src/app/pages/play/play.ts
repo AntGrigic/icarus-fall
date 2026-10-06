@@ -130,6 +130,7 @@ export class PlayPage {
         division: d.player.division,
         option: d.option!,
       })),
+      startOrder: shuffle(this.drafts().map((d) => d.player.id)),
       scores: Object.fromEntries(this.drafts().map((d) => [d.player.id, holes.map(() => null)])),
       holeIndex: 0,
     });
@@ -146,4 +147,14 @@ export class PlayPage {
     });
     if (ok) this.cards.discard();
   }
+}
+
+/** Fisher–Yates: every order is equally likely. */
+function shuffle<T>(items: T[]): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
 }
