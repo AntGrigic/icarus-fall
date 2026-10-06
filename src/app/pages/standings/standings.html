@@ -1,6 +1,6 @@
 <div class="page">
   @if (!store.ready()) {
-    <div class="loading"><mat-spinner diameter="40" /></div>
+    <div class="loading"><span class="orbit-loader" role="progressbar" aria-label="Učitavanje"></span></div>
   } @else if (!league()) {
     <div class="empty-state">
       <mat-icon>emoji_events</mat-icon>
@@ -28,12 +28,22 @@
         <p class="muted sub">{{ weekLabel() }}</p>
       </div>
       @if (isActiveLeague() && standings()?.info?.status === 'running') {
-        <a mat-flat-button routerLink="/play">
+        <a mat-flat-button routerLink="/play" class="cta">
           <mat-icon>edit_note</mat-icon>
           Upiši rezultate
         </a>
       }
     </header>
+
+    @if (season().length) {
+      <ol class="season" aria-label="Tjedni sezone">
+        @for (w of season(); track w.week) {
+          <li [class]="w.state" [title]="'Tjedan ' + w.week">
+            <span>{{ w.week }}</span>
+          </li>
+        }
+      </ol>
+    }
 
     @if (closedHoles().length) {
       <div class="notice">
@@ -53,7 +63,7 @@
     />
 
     @if (!standings()) {
-      <div class="loading"><mat-spinner diameter="40" /></div>
+      <div class="loading"><span class="orbit-loader" role="progressbar" aria-label="Učitavanje"></span></div>
     } @else if (!standings()!.rows.length) {
       <div class="empty-state">
         <mat-icon>sports</mat-icon>
@@ -62,6 +72,7 @@
       </div>
     } @else {
       @let s = standings()!;
+
       <div class="table-wrap">
         <table class="standings">
           <thead>
@@ -78,7 +89,13 @@
           <tbody>
             @for (row of s.rows; track row.playerId) {
               <tr>
-                <td class="pos">{{ row.rank ? (row.tied ? 'T' : '') + row.rank : '–' }}</td>
+                <td class="pos">
+                  @if (row.rank && row.rank <= 3) {
+                    <span class="rank-badge r{{ row.rank }}">{{ (row.tied ? 'T' : '') + row.rank }}</span>
+                  } @else {
+                    {{ row.rank ? (row.tied ? 'T' : '') + row.rank : '–' }}
+                  }
+                </td>
                 <td class="name">
                   <a [routerLink]="['/player', row.playerId]">{{ row.name }}</a>
                 </td>

@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 
@@ -19,7 +18,6 @@ const DIVISION_KEY = 'icarus-fall.division';
     RouterLink,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     MatSelectModule,
     DivisionSwitch,
     ToParPipe,
@@ -58,6 +56,21 @@ export class StandingsPage {
   protected readonly weeks = computed(() =>
     Array.from({ length: this.league()?.totalWeeks ?? 0 }, (_, i) => i + 1),
   );
+
+  /** One segment per week for the season progress strip. */
+  protected readonly season = computed(() => {
+    const info = this.standings()?.info;
+    if (!info) return [];
+    return this.weeks().map((week) => ({
+      week,
+      state:
+        info.status === 'finished' || (info.status === 'running' && week < info.week)
+          ? 'done'
+          : info.status === 'running' && week === info.week
+            ? 'now'
+            : 'next',
+    }));
+  });
 
   protected readonly weekLabel = computed(() => {
     const league = this.league();

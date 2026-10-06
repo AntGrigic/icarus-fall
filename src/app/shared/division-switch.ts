@@ -37,24 +37,26 @@ import { Division, DIVISIONS } from '../core/models';
       width: 100%;
       max-width: 360px;
       box-sizing: border-box;
-      padding: 4px;
+      padding: 5px;
       border-radius: 999px;
-      background: var(--mat-sys-surface-container-high);
-      border: 1px solid var(--mat-sys-outline-variant);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      box-shadow: inset 0 1px 0 var(--glass-shine);
+      backdrop-filter: blur(14px);
     }
 
     :host::before {
       content: '';
       position: absolute;
-      top: 4px;
-      bottom: 4px;
-      left: 4px;
-      width: calc((100% - 8px) / var(--count));
+      top: 5px;
+      bottom: 5px;
+      left: 5px;
+      width: calc((100% - 10px) / var(--count));
       border-radius: 999px;
-      background: var(--mat-sys-primary);
-      box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+      background: var(--brand-grad);
+      box-shadow: 0 8px 20px -8px var(--glow), inset 0 1px 0 rgb(255 255 255 / 0.3);
       transform: translateX(calc(var(--active) * 100%));
-      transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
+      transition: transform 350ms var(--ease-out);
     }
 
     .option {
@@ -79,7 +81,7 @@ import { Division, DIVISIONS } from '../core/models';
     }
 
     .option.active {
-      color: var(--mat-sys-on-primary);
+      color: var(--on-brand);
     }
 
     .option:focus-visible {

@@ -3,24 +3,70 @@
 }
 
 .sub {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
 }
 
 .league-select {
-  font: var(--mat-sys-headline-small);
+  font: var(--mat-sys-headline-medium);
+  font-weight: 700;
   max-width: 100%;
   min-width: 220px;
 }
 
-.divisions {
-  margin-bottom: 16px;
+.cta {
+  height: 50px;
+  padding: 0 26px;
+  font-size: 15px;
 }
+
+/* Season progress: one segment per week. */
+.season {
+  display: flex;
+  gap: 5px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px;
+
+  li {
+    position: relative;
+    flex: 1;
+    height: 8px;
+    border-radius: 99px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 10%, transparent);
+  }
+
+  .done {
+    background: var(--brand-grad);
+    opacity: 0.75;
+  }
+
+  .now {
+    background: var(--brand-grad);
+  }
+
+  span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
+.divisions {
+  margin-bottom: 20px;
+}
+
+/* Table */
 
 .table-wrap {
   overflow-x: auto;
-  border: 1px solid var(--mat-sys-outline-variant);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
-  background: var(--mat-sys-surface-container-lowest);
+  background: var(--glass-strong);
+  box-shadow: var(--shadow-1);
+  backdrop-filter: blur(18px);
 }
 
 .standings {
@@ -31,16 +77,25 @@
 
   th,
   td {
-    padding: 10px 8px;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--glass-border);
     text-align: center;
     white-space: nowrap;
+    transition: background-color 200ms;
   }
 
   th {
     font: var(--mat-sys-label-medium);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     color: var(--mat-sys-on-surface-variant);
-    background: var(--mat-sys-surface-container);
+  }
+
+  tbody tr:hover td {
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--jx-amber) 9%, transparent),
+      color-mix(in srgb, var(--jx-amber) 9%, transparent)
+    );
   }
 
   tbody tr:last-child td {
@@ -52,39 +107,42 @@
   .name {
     position: sticky;
     z-index: 1;
-    background: var(--mat-sys-surface-container-lowest);
-  }
-
-  th.pos,
-  th.name {
-    background: var(--mat-sys-surface-container);
+    background-color: var(--glass-solid);
   }
 
   .pos {
     left: 0;
-    width: 36px;
-    min-width: 36px;
+    width: 44px;
+    min-width: 44px;
     box-sizing: border-box;
     color: var(--mat-sys-on-surface-variant);
+    font-weight: 600;
   }
 
   .name {
-    left: 36px;
+    left: 44px;
     text-align: left;
     max-width: 44vw;
     overflow: hidden;
     text-overflow: ellipsis;
-    box-shadow: 1px 0 0 var(--mat-sys-outline-variant);
+    box-shadow: 1px 0 0 var(--glass-border);
 
     a {
       color: var(--mat-sys-on-surface);
-      font-weight: 500;
+      font-weight: 600;
       text-decoration: none;
+      background: linear-gradient(var(--mat-sys-primary), var(--mat-sys-primary)) no-repeat 0 100% / 0 2px;
+      transition: background-size 350ms var(--ease-out), color 200ms;
+
+      &:hover {
+        color: var(--mat-sys-primary);
+        background-size: 100% 2px;
+      }
     }
   }
 
   td.total {
-    font: var(--mat-sys-title-medium);
+    font: 700 18px / 1 'Space Grotesk', sans-serif;
   }
 
   .wks {
@@ -92,11 +150,11 @@
   }
 
   .wk {
-    min-width: 34px;
+    min-width: 36px;
   }
 
   .current {
-    background: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+    background-color: color-mix(in srgb, var(--jx-amber) 10%, transparent);
   }
 
   th.current {
@@ -124,22 +182,49 @@
   }
 }
 
+.rank-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #2a1400;
+  font: 700 12px / 1 'Space Grotesk', sans-serif;
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.6);
+
+  &.r1 {
+    background: linear-gradient(140deg, #ffe7b5, #f0a24e 55%, #c2562d);
+  }
+
+  &.r2 {
+    background: linear-gradient(140deg, #fffaf1, #e2d6c8 55%, #b5a796);
+  }
+
+  &.r3 {
+    background: linear-gradient(140deg, #f6c39f, #c8714a 55%, #8f3f26);
+  }
+}
+
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 18px;
+  gap: 8px;
   list-style: none;
   padding: 0;
-  margin: 12px 2px 0;
+  margin: 14px 2px 0;
   font: var(--mat-sys-body-small);
+
+  li {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+  }
 
   sup {
     font-size: 9px;
-  }
-
-  .pending {
-    opacity: 0.6;
-    font-style: italic;
+    font-weight: 700;
+    color: var(--mat-sys-primary);
   }
 
   .dropped {
