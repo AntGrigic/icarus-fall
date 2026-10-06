@@ -1,0 +1,76 @@
+/*
+ * The backdrop behind every page (markup in app.html): the sky of Jupiter.
+ * By day, warm sunlight with faint rays from the top corner; by night, a purple and gold glow.
+ * Everything drifts slowly (35–55 s each way, rays a full turn in 4 minutes), only transforms are
+ * animated, and it all stands still with reduced motion (see styles.scss).
+ */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--sky);
+}
+
+/* Soft light pools: radial gradients that wander and swell, never quite repeating together. */
+.backdrop .glow {
+  position: absolute;
+  width: 72vmax;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--light), transparent);
+  will-change: transform;
+  animation: drift var(--time) ease-in-out infinite alternate;
+
+  &.one {
+    --light: light-dark(rgb(236 190 100 / 0.5), rgb(122 46 104 / 0.45));
+    --time: 35s;
+    left: -26vmax;
+    top: -32vmax;
+  }
+
+  &.two {
+    --light: light-dark(rgb(140 60 116 / 0.15), rgb(212 178 106 / 0.14));
+    --time: 44s;
+    right: -28vmax;
+    bottom: -34vmax;
+    animation-direction: alternate-reverse;
+  }
+
+  &.three {
+    --light: light-dark(rgb(244 210 146 / 0.45), rgb(94 38 80 / 0.35));
+    --time: 55s;
+    width: 54vmax;
+    left: 38%;
+    top: 22%;
+    animation-delay: -20s;
+  }
+}
+
+/* Sun rays fanning out from above the top left corner, turning slowly. */
+.backdrop .rays {
+  --ray: light-dark(rgb(214 170 84 / 0.14), rgb(220 187 114 / 0.06));
+  position: absolute;
+  width: 200vmax;
+  aspect-ratio: 1;
+  left: -100vmax;
+  top: -100vmax;
+  background: repeating-conic-gradient(var(--ray) 0deg, transparent 2.5deg 9.5deg, var(--ray) 12deg);
+  mask: radial-gradient(closest-side, #000 8%, transparent 75%);
+  will-change: transform;
+  animation: turn 240s linear infinite;
+}
+
+@keyframes drift {
+  to {
+    transform: translate(16vmax, 10vmax) scale(1.2);
+  }
+}
+
+@keyframes turn {
+  to {
+    transform: rotate(1turn);
+  }
+}

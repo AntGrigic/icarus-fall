@@ -15,7 +15,7 @@ import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/forma
     <div class="page narrow">
       <a mat-button routerLink="/standings" class="back"><mat-icon>arrow_back</mat-icon> Poredak</a>
       @if (!store.ready() || !store.viewedRounds()) {
-        <div class="loading"><span class="orbit-loader" role="progressbar" aria-label="Učitavanje"></span></div>
+        <div class="loading"><span class="coin-loader" role="progressbar" aria-label="Učitavanje"></span></div>
       } @else if (!row()) {
         <div class="empty-state">
           <mat-icon>person_off</mat-icon>
@@ -78,20 +78,20 @@ import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/forma
     .stats { display: flex; gap: 10px; }
     .tile {
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-      min-width: 76px; padding: 12px 10px; border-radius: 18px; font: var(--mat-sys-label-small);
-      background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(14px);
-      box-shadow: var(--shadow-1), inset 0 1px 0 var(--glass-shine);
+      min-width: 76px; padding: 12px 10px; border-radius: var(--radius); font: var(--mat-sys-label-small);
+      background: var(--panel); border: 1px solid var(--rule-strong);
+      box-shadow: var(--shadow-1);
     }
-    .tile.lead { background: var(--brand-grad); color: var(--on-brand); border-color: transparent; }
-    .stat { font: 700 26px / 1.1 'Space Grotesk', sans-serif; }
+    .tile.lead { background: var(--brand); color: var(--on-brand); border-color: var(--gold); }
+    .stat { font: 700 28px / 1.1 var(--font-text); }
     .week { margin-bottom: 14px; }
     .week.faded { opacity: 0.65; }
     .week-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .spacer { flex: 1; }
-    .score { font: 700 22px / 1 'Space Grotesk', sans-serif; }
+    .score { font: 700 24px / 1 var(--font-text); }
     .holes { display: grid; grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); gap: 5px; }
     .h {
-      display: flex; flex-direction: column; align-items: center; padding: 4px 0; border-radius: 10px;
+      display: flex; flex-direction: column; align-items: center; padding: 4px 0; border-radius: 3px;
       background: var(--score-bg, color-mix(in srgb, var(--mat-sys-surface-container-highest) 70%, transparent));
       color: var(--score-fg, inherit);
     }

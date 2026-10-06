@@ -98,7 +98,7 @@ export interface RoundEditorData {
     .who { margin-top: 0; }
     .holes { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
     .hole {
-      display: flex; flex-direction: column; padding: 8px; border-radius: 14px;
+      display: flex; flex-direction: column; padding: 8px; border-radius: var(--radius-sm);
       background: var(--score-bg, color-mix(in srgb, var(--mat-sys-surface-container-highest) 70%, transparent));
       color: var(--score-fg, inherit); transition: background-color 300ms, color 300ms;
     }
@@ -107,12 +107,12 @@ export interface RoundEditorData {
     .hole input {
       width: 100%; box-sizing: border-box; margin-top: 4px; padding: 4px;
       font: var(--mat-sys-title-medium); text-align: center;
-      font-family: 'Space Grotesk', sans-serif; font-weight: 700;
-      border: 1px solid var(--glass-border-strong); border-radius: 10px;
+      font-family: var(--font-text); font-weight: 700;
+      border: 1px solid var(--rule-strong); border-radius: 3px;
       background: var(--mat-sys-surface); color: var(--mat-sys-on-surface);
     }
     .total { margin: 16px 0 0; font: var(--mat-sys-title-medium); }
-    .total strong { font: 700 20px / 1 'Space Grotesk', sans-serif; }
+    .total strong { font: 700 22px / 1 var(--font-text); }
   `,
 })
 export class RoundEditor {

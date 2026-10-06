@@ -1,6 +1,7 @@
 @if (view() === 'done' && submitted(); as done) {
   <div class="page narrow done">
     <div class="done-icon" [class.queued]="done.result === 'queued'">
+      <span class="laurel" aria-hidden="true"></span>
       @if (done.result === 'saved') {
         <svg class="check" viewBox="0 0 52 52" aria-hidden="true">
           <path d="M15 27 l8 8 l15 -17" />
@@ -17,7 +18,7 @@
         Trenutno nema signala. Rezultati će se poslati automatski kad se veza vrati. Ostavi aplikaciju otvorenu ili je kasnije ponovno otvori.
       }
     </p>
-    <ul class="done-list panel">
+    <ul class="done-list panel framed">
       @for (r of done.rounds; track r.playerId) {
         <li>
           <span class="dname">{{ r.playerName }}</span>

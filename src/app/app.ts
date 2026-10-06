@@ -1,6 +1,8 @@
 import { Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
@@ -8,16 +10,18 @@ import { filter, map } from 'rxjs';
 
 import { CardService } from './play/card.service';
 import { DataStore } from './data/data-store';
+import { ThemeMode, ThemeService } from './shared/theme';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, MatIconModule],
+  imports: [RouterOutlet, RouterLink, MatButtonModule, MatIconModule, MatMenuModule],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App {
   protected readonly store = inject(DataStore);
   protected readonly cards = inject(CardService);
+  protected readonly theme = inject(ThemeService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
 
@@ -25,6 +29,12 @@ export class App {
     { path: '/standings', icon: 'leaderboard', label: 'Poredak' },
     { path: '/play', icon: 'edit_note', label: 'Igraj' },
     { path: '/admin', icon: 'admin_panel_settings', label: 'Admin' },
+  ];
+
+  protected readonly themes: { mode: ThemeMode; icon: string; label: string }[] = [
+    { mode: 'light', icon: 'light_mode', label: 'Svijetla' },
+    { mode: 'dark', icon: 'dark_mode', label: 'Tamna' },
+    { mode: 'auto', icon: 'brightness_auto', label: 'Prema uređaju' },
   ];
 
   private readonly url = toSignal(

@@ -1,15 +1,9 @@
-<!-- Backdrop: stars, a soft glow and a slowly turning Jupiter. -->
-<div class="sky" aria-hidden="true">
-  <div class="stars"></div>
-  <div class="nebula one"></div>
-  <div class="nebula two"></div>
-  <div class="world">
-    <div class="planet">
-      <div class="jets east"></div>
-      <div class="jets west"></div>
-      <div class="red-spot"></div>
-    </div>
-  </div>
+<!-- Backdrop: soft daylight (moonlight in the dark theme) drifting slowly across the page. -->
+<div class="backdrop" aria-hidden="true">
+  <span class="rays"></span>
+  <span class="glow one"></span>
+  <span class="glow two"></span>
+  <span class="glow three"></span>
 </div>
 
 @if (store.mode() === 'demo') {
@@ -49,6 +43,32 @@
         </a>
       }
     </nav>
+    <button
+      mat-icon-button
+      class="theme-btn"
+      [matMenuTriggerFor]="themeMenu"
+      [attr.aria-label]="theme.scheme() === 'dark' ? 'Tema: tamna' : 'Tema: svijetla'"
+      title="Svijetla ili tamna tema"
+    >
+      <mat-icon>{{ theme.scheme() === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+    </button>
+    <mat-menu #themeMenu="matMenu" xPosition="before">
+      @for (t of themes; track t.mode) {
+        <button
+          mat-menu-item
+          role="menuitemradio"
+          [attr.aria-checked]="theme.mode() === t.mode"
+          (click)="theme.set(t.mode)"
+        >
+          <mat-icon>{{ t.icon }}</mat-icon>
+          <span>{{ t.label }}</span>
+          @if (theme.mode() === t.mode) {
+            <!-- Wrapped: a bare mat-icon would be moved in front of the label. -->
+            <span class="theme-check" aria-hidden="true"><mat-icon>check</mat-icon></span>
+          }
+        </button>
+      }
+    </mat-menu>
   </div>
 </header>
 

@@ -46,3 +46,20 @@ export function plural(n: number, one: string, few: string, many: string): strin
   if (last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14)) return few;
   return many;
 }
+
+const NUMERALS: [number, string][] = [
+  [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'],
+  [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I'],
+];
+
+/** Roman numeral for week labels: roman(4) → "IV", roman(12) → "XII". */
+export function roman(n: number): string {
+  let out = '';
+  for (const [value, letters] of NUMERALS) {
+    while (n >= value) {
+      out += letters;
+      n -= value;
+    }
+  }
+  return out;
+}

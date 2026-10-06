@@ -20,7 +20,7 @@
 
 .login-logo {
   border-radius: 50%;
-  box-shadow: 0 8px 24px -8px var(--glow);
+  box-shadow: 0 2px 8px -2px rgb(60 40 10 / 0.5);
 }
 
 .google-btn {
@@ -42,7 +42,7 @@
   box-sizing: border-box;
   text-align: left;
   padding: 14px 16px;
-  border-radius: 16px;
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--mat-sys-tertiary-container) 80%, transparent);
   color: var(--mat-sys-on-tertiary-container);
 
@@ -62,7 +62,7 @@
 .uid {
   flex: 1;
   padding: 8px 10px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   word-break: break-all;

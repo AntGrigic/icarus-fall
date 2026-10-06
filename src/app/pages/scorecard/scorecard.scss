@@ -16,8 +16,8 @@
 }
 
 .nav-btn {
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
+  background: var(--panel);
+  border: 1px solid var(--rule-strong);
 }
 
 .hole-title {
@@ -32,8 +32,7 @@
 }
 
 .hole-no {
-  font: 700 56px / 1 'Space Grotesk', sans-serif;
-  letter-spacing: -0.04em;
+  font: 700 56px / 1.05 var(--font-text);
   animation: num-from-right 300ms var(--ease-out) both;
 
   &.back {
@@ -51,25 +50,24 @@
 }
 
 .par-chip {
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: var(--brand-grad);
+  padding: 3px 10px 2px;
+  border-radius: 3px;
+  background: var(--brand);
   color: var(--on-brand);
-  font-weight: 700;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 65%, transparent);
+  font: 700 14px / 1.3 var(--font-text);
 }
 
 .progress {
-  height: 5px;
+  height: 3px;
   margin: 16px 4px 4px;
-  border-radius: 99px;
-  background: color-mix(in srgb, var(--mat-sys-on-surface) 10%, transparent);
+  background: var(--rule);
   overflow: hidden;
 
   span {
     display: block;
     height: 100%;
-    border-radius: inherit;
-    background: var(--brand-grad);
+    background: var(--gold);
     transition: width 400ms var(--ease-out);
   }
 }
@@ -89,25 +87,25 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 1px solid var(--glass-border-strong);
-  background: var(--glass);
+  border: 1px solid var(--rule-strong);
+  background: var(--panel);
   color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-label-medium);
+  font: 600 14px / 1 var(--font-text);
   cursor: pointer;
   transition:
     background-color 200ms,
     color 200ms;
 
   &.done {
-    background: color-mix(in srgb, var(--mat-sys-primary) 18%, transparent);
+    background: color-mix(in srgb, var(--gold) 22%, var(--panel));
     color: var(--mat-sys-on-surface);
-    border-color: transparent;
+    border-color: color-mix(in srgb, var(--gold) 60%, transparent);
   }
 
   &.active {
-    background: var(--brand-grad);
+    background: var(--brand);
     color: var(--on-brand);
-    border-color: transparent;
+    border-color: var(--gold);
     font-weight: 700;
   }
 }
@@ -126,10 +124,9 @@
   gap: 6px;
   padding: 12px;
   border-radius: var(--radius);
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-1), inset 0 1px 0 var(--glass-shine);
-  backdrop-filter: blur(16px);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow-1);
   animation: slide-from-right 300ms var(--ease-out) both;
 
   .back & {
@@ -145,7 +142,7 @@
 }
 
 .pname {
-  font: var(--mat-sys-title-medium);
+  font: 600 18px / 1.3 var(--font-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -157,9 +154,9 @@
 
 .step {
   height: 60px;
-  border-radius: 18px;
-  border: 1px solid var(--glass-border);
-  background: color-mix(in srgb, var(--mat-sys-surface-container-highest) 70%, transparent);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--rule-strong);
+  background: var(--mat-sys-surface-container-high);
   color: var(--mat-sys-on-surface);
   cursor: pointer;
   display: grid;
@@ -167,7 +164,7 @@
   transition: background-color 150ms;
 
   &:active {
-    background: color-mix(in srgb, var(--mat-sys-primary) 28%, transparent);
+    background: color-mix(in srgb, var(--gold) 30%, var(--mat-sys-surface-container-high));
   }
 }
 
@@ -175,11 +172,11 @@
   position: relative;
   height: 60px;
   overflow: hidden;
-  border-radius: 18px;
+  border-radius: var(--radius-sm);
   border: 2px solid transparent;
-  background: var(--score-bg, var(--glass-strong));
+  background: var(--score-bg, var(--panel-strong));
   color: var(--score-fg, var(--mat-sys-on-surface));
-  font: 700 28px / 1 'Space Grotesk', sans-serif;
+  font: 700 30px / 1 var(--font-text);
   cursor: pointer;
   transition:
     background-color 250ms,
@@ -187,7 +184,7 @@
 
   &.unset {
     color: var(--mat-sys-outline);
-    border: 2px dashed var(--glass-border-strong);
+    border: 2px dashed var(--rule-strong);
 
     .num {
       opacity: 0.55;
@@ -206,7 +203,7 @@
 
 .hole-actions {
   position: sticky;
-  bottom: calc(92px + env(safe-area-inset-bottom));
+  bottom: calc(76px + env(safe-area-inset-bottom));
 }
 
 @media (min-width: 720px) {
@@ -218,8 +215,7 @@
 .big {
   width: 100%;
   height: 56px;
-  font-size: 16px;
-  border-radius: 999px;
+  font-size: 15px;
 }
 
 /* ---------- Review ---------- */
@@ -241,7 +237,7 @@
 }
 
 .rp-total {
-  font: 700 20px / 1.2 'Space Grotesk', sans-serif;
+  font: 700 22px / 1.2 var(--font-text);
 }
 
 .rp-option {
@@ -249,11 +245,11 @@
 }
 
 .option-select {
-  border: 1px solid var(--glass-border-strong);
-  border-radius: 14px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-sm);
   padding: 10px 14px;
   box-sizing: border-box;
-  background: var(--glass);
+  background: var(--panel-strong);
 }
 
 .mini-card {
@@ -268,8 +264,8 @@
   align-items: center;
   padding: 4px 0;
   border: 0;
-  border-radius: 10px;
-  background: var(--score-bg, color-mix(in srgb, var(--mat-sys-surface-container-highest) 70%, transparent));
+  border-radius: 3px;
+  background: var(--score-bg, var(--mat-sys-surface-container-high));
   color: var(--score-fg, var(--mat-sys-on-surface));
   cursor: pointer;
   font: inherit;
@@ -280,7 +276,7 @@
 }
 
 .mn {
-  font-size: 10px;
+  font-size: 11px;
   opacity: 0.7;
 }
 
@@ -320,21 +316,29 @@
   }
 }
 
+/* The victor's laurel around a check mark (or, without signal, around a cloud). */
 .done-icon {
   position: relative;
   display: grid;
   place-items: center;
-  width: 96px;
-  height: 96px;
-  margin: 46px auto 20px;
-  border-radius: 50%;
-  background: var(--brand-grad);
-  color: var(--on-brand);
+  width: 136px;
+  height: 136px;
+  margin: 36px auto 14px;
+  color: var(--mat-sys-primary);
   animation: pop 500ms var(--ease-out) both;
 
+  .laurel {
+    position: absolute;
+    inset: 0;
+    color: var(--gold);
+  }
+
   &.queued {
-    background: var(--mat-sys-tertiary-container);
-    color: var(--mat-sys-on-tertiary-container);
+    color: var(--mat-sys-tertiary);
+
+    .laurel {
+      color: var(--mat-sys-outline);
+    }
   }
 
   mat-icon {
@@ -342,12 +346,11 @@
     width: 44px;
     height: 44px;
   }
-
 }
 
 .check {
-  width: 54px;
-  height: 54px;
+  width: 60px;
+  height: 60px;
 
   path {
     fill: none;
@@ -364,7 +367,7 @@
 .done-list {
   list-style: none;
   margin: 24px 0;
-  padding: 4px 18px;
+  padding: 4px 20px;
   text-align: left;
 
   li {
@@ -373,7 +376,7 @@
     grid-template-areas: 'name score strokes' 'meta score strokes';
     column-gap: 14px;
     padding: 12px 0;
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--rule);
 
     &:last-child {
       border-bottom: 0;
@@ -401,11 +404,11 @@
 }
 
 .dname {
-  font-weight: 600;
+  font: 600 17px / 1.3 var(--font-text);
 }
 
 .dscore {
-  font: 700 22px / 1 'Space Grotesk', sans-serif;
+  font: 700 24px / 1 var(--font-text);
 }
 
 .done-actions {
