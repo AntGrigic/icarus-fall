@@ -60,7 +60,9 @@ export class ScorecardPage {
   /** Why each player's round can't be submitted yet (null = ready). */
   protected readonly problems = computed(() => {
     const card = this.card();
-    if (!card) return {};
+    // While saving, Firestore already shows our own rounds in the live data before the server
+    // confirms them, which would flag every player as "already saved". It was checked before saving.
+    if (!card || this.saving()) return {};
     const out: Record<string, string | null> = {};
     for (const p of card.players) out[p.playerId] = this.problemFor(p);
     return out;
