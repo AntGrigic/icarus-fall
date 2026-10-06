@@ -95,6 +95,20 @@ export class StandingsPage {
     return league && info?.status === 'running' ? disabledHoles(league, info.week) : [];
   });
 
+  /** "Igra se 16 staza. Staza 9 i 10 se ne igraju već se upisuju ko par!" */
+  protected readonly closedNotice = computed(() => {
+    const closed = this.closedHoles();
+    const league = this.league();
+    if (!closed.length || !league) return '';
+    const played = league.holes.length - closed.length;
+    const many = closed.length > 1;
+    const list = many ? `${closed.slice(0, -1).join(', ')} i ${closed.at(-1)}` : `${closed[0]}`;
+    return (
+      `Igra se ${played} ${plural(played, 'staza', 'staze', 'staza')}. ` +
+      `Staza ${list} se ne ${many ? 'igraju' : 'igra'} već se ${many ? 'upisuju' : 'upisuje'} ko par!`
+    );
+  });
+
   protected setDivision(division: Division): void {
     this.division.set(division);
     try {

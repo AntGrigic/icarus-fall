@@ -182,6 +182,16 @@
     color: var(--mat-sys-on-surface-variant);
   }
 
+  // Played in advance: the fast-forward icon of the Play page, raised like the P of a repeat.
+  .ahead {
+    width: 12px;
+    height: 12px;
+    font-size: 12px;
+    margin-left: 1px;
+    vertical-align: 5px;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
   .none {
     color: var(--mat-sys-outline);
   }
@@ -246,6 +256,14 @@
     font-size: 10px;
     font-weight: 700;
     font-style: normal;
+    color: var(--gold-ink);
+  }
+
+  .ahead {
+    width: 13px;
+    height: 13px;
+    font-size: 13px;
+    vertical-align: -2px;
     color: var(--gold-ink);
   }
 
