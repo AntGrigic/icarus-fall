@@ -1,11 +1,13 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 
-import { computeStandings, roundTypeLabel, WeekCell } from '../../core/league-math';
+import { computeStandings, isTotalOnly, roundTypeLabel, WeekCell } from '../../core/league-math';
 import { DataStore } from '../../data/data-store';
 import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/format';
+import type { RoundEditorData } from '../admin/round-editor';
 
 /** One player's rounds in the viewed league, hole by hole. */
 @Component({
@@ -13,7 +15,15 @@ import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/forma
   imports: [RouterLink, MatButtonModule, MatIconModule, ToParPipe],
   template: `
     <div class="page narrow">
-      <a mat-button routerLink="/standings" class="back"><mat-icon>arrow_back</mat-icon> Poredak</a>
+      <div class="top">
+        <a mat-button routerLink="/standings" class="back"><mat-icon>arrow_back</mat-icon> Poredak</a>
+        @if (store.isAdmin() && store.viewedLeague()) {
+          <button mat-stroked-button (click)="addRound()">
+            <mat-icon>add</mat-icon>
+            Dodaj rundu
+          </button>
+        }
+      </div>
       @if (!store.ready() || !store.viewedRounds()) {
         <div class="loading"><span class="coin-loader" role="progressbar" aria-label="Učitavanje"></span></div>
       } @else if (!row()) {
@@ -51,14 +61,18 @@ import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/forma
               <span class="score" [class]="totalClass(cell.round.toPar)">{{ cell.round.toPar | toPar }}</span>
               <span class="muted">{{ cell.round.strokes }}</span>
             </div>
-            <div class="holes">
-              @for (h of cell.round.holes; track h.number) {
-                <div class="h" [class]="scoreClass(h.strokes - h.par)">
-                  <span class="hn">{{ h.number }}</span>
-                  <span class="hs">{{ h.strokes }}</span>
-                </div>
-              }
-            </div>
+            @if (isTotalOnly(cell.round)) {
+              <p class="muted total-only">Upisan je samo konačni rezultat, bez koš po koš.</p>
+            } @else {
+              <div class="holes">
+                @for (h of cell.round.holes; track h.number) {
+                  <div class="h" [class]="scoreClass(h.strokes - h.par)">
+                    <span class="hn">{{ h.number }}</span>
+                    <span class="hs">{{ h.strokes }}</span>
+                  </div>
+                }
+              </div>
+            }
             <p class="muted meta">
               Odigrano {{ day(cell.round.playedAt) }}{{ cell.round.scoredBy && cell.round.scoredBy !== r.name ? ' · zapisničar: ' + cell.round.scoredBy : '' }}
               @if (cell.replaced) {
@@ -72,7 +86,8 @@ import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/forma
   `,
   styles: `
     .narrow { max-width: 760px; }
-    .back { margin: -8px 0 8px -8px; }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -8px 0 8px -8px; }
+    .total-only { margin: 0; font: var(--mat-sys-body-small); }
     .sub { margin: 4px 0 0; }
     .who { min-width: 0; }
     .stats { display: flex; gap: 10px; }
@@ -102,11 +117,13 @@ import { formatDay, scoreClass, ToParPipe, totalClass } from '../../shared/forma
 })
 export class PlayerPage {
   protected readonly store = inject(DataStore);
+  private readonly dialog = inject(MatDialog);
   readonly id = input.required<string>();
 
   protected readonly scoreClass = scoreClass;
   protected readonly totalClass = totalClass;
   protected readonly typeLabel = roundTypeLabel;
+  protected readonly isTotalOnly = isTotalOnly;
   protected readonly day = formatDay;
 
   protected readonly row = computed(() => {
@@ -128,4 +145,17 @@ export class PlayerPage {
   protected readonly cells = computed(() =>
     (this.row()?.cells ?? []).filter((c): c is WeekCell => !!c).reverse(),
   );
+
+  /** Admin: add a round for this player (the dialog opens on just the final score). */
+  protected async addRound(): Promise<void> {
+    const league = this.store.viewedLeague();
+    if (!league) return;
+    // Loaded on demand: only admins ever need the editor here.
+    const { RoundEditor } = await import('../admin/round-editor');
+    this.dialog.open<InstanceType<typeof RoundEditor>, RoundEditorData>(RoundEditor, {
+      data: { league, round: null, playerId: this.id() },
+      width: '640px',
+      maxWidth: '96vw',
+    });
+  }
 }

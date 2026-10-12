@@ -16,7 +16,7 @@ import {
 } from '../../core/league-math';
 import { Player } from '../../core/models';
 import { DataStore } from '../../data/data-store';
-import { CardService } from '../../play/card.service';
+import { CardMode, CardService } from '../../play/card.service';
 import { Confirm } from '../../shared/confirm';
 import { formatDay, formatRange, plural } from '../../shared/format';
 import { PlayerPicker } from '../../shared/player-picker';
@@ -102,7 +102,8 @@ export class PlayPage {
     this.drafts.update((list) => list.map((d) => (d.player.id === playerId ? { ...d, option } : d)));
   }
 
-  protected async start(): Promise<void> {
+  /** 'holes' = the scorecard hole by hole; 'total' = just each player's final score. */
+  protected async start(mode: CardMode): Promise<void> {
     const league = this.league();
     const week = this.week();
     if (!league || !week || !this.canStart()) return;
@@ -119,10 +120,12 @@ export class PlayPage {
     }
 
     const holes = playableHoles(league, week.week);
+    const ids = this.drafts().map((d) => d.player.id);
     this.cards.start({
       id: newId(),
       leagueId: league.id,
       createdAt: Date.now(),
+      mode,
       holes,
       players: this.drafts().map((d) => ({
         playerId: d.player.id,
@@ -130,8 +133,9 @@ export class PlayPage {
         division: d.player.division,
         option: d.option!,
       })),
-      startOrder: shuffle(this.drafts().map((d) => d.player.id)),
-      scores: Object.fromEntries(this.drafts().map((d) => [d.player.id, holes.map(() => null)])),
+      startOrder: shuffle(ids),
+      scores: mode === 'holes' ? Object.fromEntries(ids.map((id) => [id, holes.map(() => null)])) : {},
+      totals: mode === 'total' ? Object.fromEntries(ids.map((id) => [id, null])) : undefined,
       holeIndex: 0,
     });
     this.drafts.set([]);

@@ -2,12 +2,15 @@ import {
   computeStandings,
   currentWeek,
   formatToPar,
+  isTotalOnly,
   matchesSearch,
   nameKey,
   playableHoles,
   roundOptions,
   throwingOrder,
   tidyName,
+  totalOnlyScore,
+  totalRange,
 } from './league-math';
 import { Attempt, League, Player, Round, RoundType } from './models';
 
@@ -218,5 +221,21 @@ describe('throwingOrder', () => {
   it('skips holes that are not fully scored yet', () => {
     const scores = { aki: [3, null], bato: [2, 2], cro: [4, 5] };
     expect(throwingOrder(start, scores, 2)).toEqual(['bato', 'aki', 'cro']);
+  });
+});
+
+describe('final score only', () => {
+  it('takes par from the holes that were open', () => {
+    const holes = league().holes.filter((h) => h.number !== 9 && h.number !== 10); // 16 holes, par 48
+    expect(totalOnlyScore(holes, 45)).toEqual({ holes: [], strokes: 45, par: 48, toPar: -3 });
+  });
+
+  it('is recognised by its missing hole scores', () => {
+    expect(isTotalOnly(round('aki', 1, -2))).toBe(true);
+    expect(isTotalOnly({ ...round('aki', 1, 0), holes: [{ number: 1, par: 3, strokes: 3 }] })).toBe(false);
+  });
+
+  it('allows one to twenty throws per hole', () => {
+    expect(totalRange(18)).toEqual({ min: 18, max: 360 });
   });
 });

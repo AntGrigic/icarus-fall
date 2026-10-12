@@ -88,6 +88,30 @@ export function scoreTotals(holes: HoleScore[]): { strokes: number; par: number;
   return { strokes, par, toPar: strokes - par };
 }
 
+export const MAX_STROKES_PER_HOLE = 20;
+
+/** Fewest and most throws a whole round on this many holes can take. */
+export function totalRange(holeCount: number): { min: number; max: number } {
+  return { min: holeCount, max: holeCount * MAX_STROKES_PER_HOLE };
+}
+
+/**
+ * A round entered as the final score only, without hole scores. Par is that of the holes
+ * that were open, so it compares fairly with hole-by-hole rounds of the same week.
+ */
+export function totalOnlyScore(
+  holes: Hole[],
+  strokes: number,
+): { holes: HoleScore[]; strokes: number; par: number; toPar: number } {
+  const par = holes.reduce((sum, h) => sum + h.par, 0);
+  return { holes: [], strokes, par, toPar: strokes - par };
+}
+
+/** True when only the final score was entered for this round. */
+export function isTotalOnly(round: Round): boolean {
+  return round.holes.length === 0;
+}
+
 /**
  * Who throws first on a hole: the lowest score on the previous hole goes first, and ties keep
  * the order they threw in on that hole (the usual disc golf rule). A hole that not everyone has

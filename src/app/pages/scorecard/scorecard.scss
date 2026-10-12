@@ -218,6 +218,57 @@
   font-size: 15px;
 }
 
+/* ---------- Final score only ---------- */
+
+.total-row {
+  display: grid;
+  grid-template-columns: 64px 1fr 64px;
+  align-items: center;
+  gap: 8px;
+
+  .step {
+    height: 68px;
+  }
+}
+
+.total-field {
+  position: relative;
+  display: block;
+
+  .value {
+    width: 100%;
+    height: 68px;
+    box-sizing: border-box;
+    padding: 0 0 14px;
+    text-align: center;
+    cursor: text;
+    appearance: textfield;
+    -moz-appearance: textfield;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    &::placeholder {
+      color: var(--mat-sys-outline);
+      opacity: 0.6;
+    }
+  }
+}
+
+.total-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  text-align: center;
+  font: var(--mat-sys-label-small);
+  color: var(--mat-sys-on-surface-variant);
+  pointer-events: none;
+}
+
 /* ---------- Review ---------- */
 
 .review-player {
@@ -409,6 +460,10 @@
 
 .dscore {
   font: 700 24px / 1 var(--font-text);
+}
+
+.share-btn {
+  margin-bottom: 12px;
 }
 
 .done-actions {

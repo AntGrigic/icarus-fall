@@ -58,6 +58,7 @@ export interface Round {
   week: number;
   attempt: Attempt;
   type: RoundType;
+  /** Empty when only the final score was entered (strokes and par are still set). */
   holes: HoleScore[];
   strokes: number;
   par: number;

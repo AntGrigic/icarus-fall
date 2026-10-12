@@ -1,6 +1,6 @@
 import { effect, Injectable, signal } from '@angular/core';
 
-import { RoundOption, scoreTotals } from '../core/league-math';
+import { RoundOption, scoreTotals, totalOnlyScore } from '../core/league-math';
 import { Division, Hole, Round } from '../core/models';
 
 export interface CardPlayer {
@@ -9,6 +9,9 @@ export interface CardPlayer {
   division: Division;
   option: RoundOption;
 }
+
+/** 'holes' = hole by hole; 'total' = only each player's final score. */
+export type CardMode = 'holes' | 'total';
 
 /** A round in progress. Lives only on the scorekeeper's phone until it is submitted. */
 export interface Card {
@@ -23,6 +26,10 @@ export interface Card {
   /** playerId → strokes per hole (same order as `holes`); null = not entered yet. */
   scores: Record<string, (number | null)[]>;
   holeIndex: number;
+  /** Cards saved before this existed are hole by hole. */
+  mode?: CardMode;
+  /** 'total' mode: playerId → strokes for the whole round; null = not entered yet. */
+  totals?: Record<string, number | null>;
 }
 
 const CARD_KEY = 'icarus-fall.card';
@@ -64,6 +71,10 @@ export class CardService {
     });
   }
 
+  setTotal(playerId: string, strokes: number | null): void {
+    this.patch((c) => ({ ...c, totals: { ...c.totals, [playerId]: strokes } }));
+  }
+
   /** Marks untouched scores on a hole as par (like UDisc does when you move on). */
   fillPar(holeIndex: number): void {
     const card = this.card();
@@ -92,7 +103,10 @@ export class CardService {
     const scoredBy = card.players[0]?.name ?? '';
     const playedAt = Date.now();
     return card.players.map((p) => {
-      const holes = card.holes.map((h, i) => ({ ...h, strokes: card.scores[p.playerId][i]! }));
+      const score =
+        card.mode === 'total'
+          ? totalOnlyScore(card.holes, card.totals![p.playerId]!)
+          : holeScores(card, p.playerId);
       return {
         playerId: p.playerId,
         playerName: p.name,
@@ -100,8 +114,7 @@ export class CardService {
         week: p.option.week,
         attempt: p.option.attempt,
         type: p.option.type,
-        holes,
-        ...scoreTotals(holes),
+        ...score,
         cardId: card.id,
         scoredBy,
         playedAt,
@@ -112,6 +125,11 @@ export class CardService {
   private patch(fn: (card: Card) => Card): void {
     this.card.update((c) => (c ? fn(c) : c));
   }
+}
+
+function holeScores(card: Card, playerId: string) {
+  const holes = card.holes.map((h, i) => ({ ...h, strokes: card.scores[playerId][i]! }));
+  return { holes, ...scoreTotals(holes) };
 }
 
 function load(): Card | null {

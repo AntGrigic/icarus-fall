@@ -28,16 +28,109 @@
         </li>
       }
     </ul>
+    @if (shareImage(); as image) {
+      <button mat-flat-button class="big share-btn" (click)="share(image)">
+        <mat-icon>share</mat-icon>
+        {{ canShareFiles ? 'Podijeli na WhatsApp' : 'Spremi sliku za WhatsApp' }}
+      </button>
+    }
     <div class="done-actions">
       <a mat-stroked-button routerLink="/play">Nova runda</a>
-      <a mat-flat-button routerLink="/standings">
-        <mat-icon>leaderboard</mat-icon>
-        Pogledaj poredak
-      </a>
+      <!-- Sharing is the main action after a full scorecard; otherwise it is the standings. -->
+      @if (shareable()) {
+        <a mat-stroked-button routerLink="/standings">
+          <mat-icon>leaderboard</mat-icon>
+          Pogledaj poredak
+        </a>
+      } @else {
+        <a mat-flat-button routerLink="/standings">
+          <mat-icon>leaderboard</mat-icon>
+          Pogledaj poredak
+        </a>
+      }
     </div>
   </div>
 } @else if (card(); as c) {
-  @if (view() === 'hole' && hole(); as h) {
+  @if (c.mode === 'total') {
+    <div class="page narrow totals">
+      <header class="page-head">
+        <div>
+          <h1>Konačni rezultat</h1>
+          <p class="muted sub">Upiši ukupan broj bacanja za svakog igrača. Par je {{ par() }} ({{ c.holes.length }} koševa).</p>
+        </div>
+      </header>
+
+      @for (p of c.players; track p.playerId) {
+        @let problem = problems()[p.playerId];
+        @let t = total(p);
+        <article class="panel review-player" [class.has-problem]="problem">
+          <div class="rp-head">
+            <strong class="pname">{{ p.name }}</strong>
+            <span class="rp-total">
+              @if (t !== null) {
+                <span [class]="totalClass(t - par())">{{ t - par() | toPar }}</span>
+              } @else {
+                <span class="muted">–</span>
+              }
+            </span>
+          </div>
+
+          <ng-container *ngTemplateOutlet="roundPicker; context: { $implicit: p }" />
+
+          <div class="total-row">
+            <button class="step" (click)="changeTotal(p, -1)" [attr.aria-label]="'Jedno bacanje manje za ' + p.name">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <label class="total-field">
+              <input
+                class="value"
+                [class.unset]="t === null"
+                type="number"
+                inputmode="numeric"
+                [value]="totalText(p)"
+                [placeholder]="par()"
+                (input)="typeTotal(p, $any($event.target).value)"
+                [attr.aria-label]="'Ukupno bacanja za ' + p.name"
+              />
+              <span class="total-label">bacanja</span>
+            </label>
+            <button class="step" (click)="changeTotal(p, 1)" [attr.aria-label]="'Jedno bacanje više za ' + p.name">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          @if (problem) {
+            <p class="error-text problem">
+              <mat-icon>error_outline</mat-icon>
+              {{ problem }}
+              @if (!optionsFor(p).length) {
+                <button mat-button (click)="removePlayer(p)">Ukloni</button>
+              }
+            </p>
+          }
+        </article>
+      }
+
+      @if (saveError()) {
+        <p class="error-text">{{ saveError() }}</p>
+      }
+
+      <div class="review-actions">
+        <button mat-stroked-button (click)="discard()">
+          <mat-icon>delete</mat-icon>
+          Odbaci
+        </button>
+        <button mat-flat-button class="big" [disabled]="!canSubmit() || saving()" (click)="submit()">
+          @if (saving()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            <mat-icon>send</mat-icon>
+          }
+          Pošalji rezultate
+        </button>
+      </div>
+    </div>
+  } @else if (view() === 'hole' && hole(); as h) {
     <div class="page narrow hole-page">
       <header class="hole-head">
         <button mat-icon-button class="nav-btn" (click)="prev()" [disabled]="index() === 0" aria-label="Prethodni koš">
@@ -156,23 +249,7 @@
             </span>
           </div>
 
-          <div class="rp-option">
-            @if (options.length) {
-              <mat-select
-                class="option-select"
-                [value]="optionKey(p.option)"
-                (valueChange)="setOption(p, $event)"
-                [aria-label]="'Runda za ' + p.name"
-                placeholder="Odaberi rundu"
-              >
-                @for (o of options; track optionKey(o)) {
-                  <mat-option [value]="optionKey(o)">{{ o.label }} · {{ o.hint }}</mat-option>
-                }
-              </mat-select>
-            } @else {
-              <span class="muted">{{ p.option.label }} · tjedan {{ p.option.week }}</span>
-            }
-          </div>
+          <ng-container *ngTemplateOutlet="roundPicker; context: { $implicit: p }" />
 
           <div class="mini-card">
             @for (hh of c.holes; track hh.number; let i = $index) {
@@ -221,3 +298,25 @@
     </div>
   }
 }
+
+<!-- Which round a player is entering; it can still be changed before sending. -->
+<ng-template #roundPicker let-p>
+  @let options = optionsFor(p);
+  <div class="rp-option">
+    @if (options.length) {
+      <mat-select
+        class="option-select"
+        [value]="optionKey(p.option)"
+        (valueChange)="setOption(p, $event)"
+        [aria-label]="'Runda za ' + p.name"
+        placeholder="Odaberi rundu"
+      >
+        @for (o of options; track optionKey(o)) {
+          <mat-option [value]="optionKey(o)">{{ o.label }} · {{ o.hint }}</mat-option>
+        }
+      </mat-select>
+    } @else {
+      <span class="muted">{{ p.option.label }} · tjedan {{ p.option.week }}</span>
+    }
+  </div>
+</ng-template>

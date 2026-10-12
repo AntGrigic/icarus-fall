@@ -1,23 +1,33 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 
-import { RoundOption, roundOptions, sameSlot, throwingOrder } from '../../core/league-math';
+import {
+  isTotalOnly,
+  MAX_STROKES_PER_HOLE,
+  RoundOption,
+  roundOptions,
+  sameSlot,
+  throwingOrder,
+  totalRange,
+} from '../../core/league-math';
 import { Round } from '../../core/models';
 import { DataStore, describeError, SaveResult } from '../../data/data-store';
 import { CardPlayer, CardService } from '../../play/card.service';
+import { scorecardImage, weeksLabel } from '../../play/scorecard-image';
 import { Confirm } from '../../shared/confirm';
 import { plural, scoreClass, ToParPipe, totalClass } from '../../shared/format';
-
-const MAX_STROKES = 20;
 
 @Component({
   selector: 'app-scorecard',
   imports: [
+    NgTemplateOutlet,
     RouterLink,
     MatButtonModule,
     MatIconModule,
@@ -34,17 +44,26 @@ export class ScorecardPage {
   private readonly cards = inject(CardService);
   private readonly router = inject(Router);
   private readonly confirm = inject(Confirm);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly card = this.cards.card;
   protected readonly view = signal<'hole' | 'review' | 'done'>('hole');
   protected readonly saving = signal(false);
   protected readonly saveError = signal<string | null>(null);
   protected readonly submitted = signal<{ result: SaveResult; rounds: Round[] } | null>(null);
+  /** Picture of the finished scorecard for the WhatsApp group (hole-by-hole cards only). */
+  protected readonly shareImage = signal<File | null>(null);
+  /** Phones (and some desktops) hand a picture straight to WhatsApp; elsewhere it is downloaded. */
+  protected readonly canShareFiles = canShareFiles();
+  /** Only a hole-by-hole card makes a picture; a final score alone has nothing to draw. */
+  protected readonly shareable = computed(() => !!this.submitted()?.rounds.every((r) => !isTotalOnly(r)));
   protected readonly scoreClass = scoreClass;
   protected readonly totalClass = totalClass;
 
   /** Which way the last hole change went, so the next hole slides in from that side. */
   protected readonly dir = signal<1 | -1>(1);
+  /** Final-score boxes being typed in, by playerId. */
+  private readonly typed = signal<Record<string, string>>({});
   /** Last +/- per player, so the number rolls up or down. */
   protected readonly lastChange = signal<Record<string, number>>({});
   private readonly strip = viewChild<ElementRef<HTMLElement>>('strip');
@@ -52,6 +71,9 @@ export class ScorecardPage {
   protected readonly index = computed(() => this.card()?.holeIndex ?? 0);
   protected readonly hole = computed(() => this.card()?.holes[this.index()] ?? null);
   protected readonly isLast = computed(() => this.index() === (this.card()?.holes.length ?? 0) - 1);
+
+  /** Par of the whole round (the holes open this week). */
+  protected readonly par = computed(() => (this.card()?.holes ?? []).reduce((sum, h) => sum + h.par, 0));
 
   /** Players in throwing order for the hole on screen. */
   protected readonly throwers = computed(() => {
@@ -76,7 +98,9 @@ export class ScorecardPage {
 
   protected readonly canSubmit = computed(() => {
     const card = this.card();
-    return !!card?.players.length && Object.values(this.problems()).every((p) => !p);
+    if (!card?.players.length || !Object.values(this.problems()).every((p) => !p)) return false;
+    // A final score that is not entered yet is not an error to show, but it can't be sent either.
+    return card.mode !== 'total' || card.players.every((p) => this.total(p) != null);
   });
 
   constructor() {
@@ -129,7 +153,35 @@ export class ScorecardPage {
     if (!hole) return;
     const current = this.score(p, this.index()) ?? hole.par;
     this.lastChange.update((last) => ({ ...last, [p.playerId]: delta }));
-    this.cards.setScore(p.playerId, this.index(), Math.min(MAX_STROKES, Math.max(1, current + delta)));
+    const strokes = Math.min(MAX_STROKES_PER_HOLE, Math.max(1, current + delta));
+    this.cards.setScore(p.playerId, this.index(), strokes);
+  }
+
+  // ----- Final score only -----
+
+  protected total(p: CardPlayer): number | null {
+    return this.card()?.totals?.[p.playerId] ?? null;
+  }
+
+  /** What the box shows: the text being typed, so a half-typed number is never wiped. */
+  protected totalText(p: CardPlayer): string {
+    return this.typed()[p.playerId] ?? String(this.total(p) ?? '');
+  }
+
+  protected changeTotal(p: CardPlayer, delta: number): void {
+    const { min, max } = totalRange(this.card()?.holes.length ?? 0);
+    const current = this.total(p) ?? this.par();
+    this.typed.update(({ [p.playerId]: _, ...others }) => others);
+    this.cards.setTotal(p.playerId, Math.min(max, Math.max(min, current + delta)));
+  }
+
+  protected typeTotal(p: CardPlayer, text: string): void {
+    this.typed.update((typed) => ({ ...typed, [p.playerId]: text }));
+    const value = parseInt(text, 10);
+    // Fewer digits than the lowest possible total: still typing, so not a score yet.
+    const { min } = totalRange(this.card()?.holes.length ?? 0);
+    const incomplete = Number.isNaN(value) || text.trim().length < String(min).length;
+    this.cards.setTotal(p.playerId, incomplete ? null : value);
   }
 
   protected confirmPar(p: CardPlayer): void {
@@ -201,6 +253,7 @@ export class ScorecardPage {
       this.submitted.set({ result, rounds });
       this.view.set('done');
       this.cards.discard();
+      if (this.shareable()) this.prepareShareImage(rounds);
     } catch (e) {
       this.saveError.set(describeError(e));
     } finally {
@@ -208,10 +261,56 @@ export class ScorecardPage {
     }
   }
 
+  /** Opens the phone's share menu with the scorecard picture (WhatsApp is in there), or downloads it. */
+  protected async share(file: File): Promise<void> {
+    const data: ShareData = { files: [file], text: this.shareText() };
+    if (this.canShareFiles && navigator.canShare(data)) {
+      try {
+        await navigator.share(data);
+      } catch (e) {
+        if ((e as Error).name !== 'AbortError') this.store.reportError(e);
+      }
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(file);
+    link.download = file.name;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 10_000);
+    this.snackBar.open('Slika je spremljena. Pošalji je u WhatsApp grupu.', 'U redu', { duration: 6000 });
+  }
+
+  /**
+   * Drawn as soon as the card is saved, so tapping Share opens the share menu at once:
+   * phones only allow sharing straight after a tap, not after a slow drawing step.
+   */
+  private async prepareShareImage(rounds: Round[]): Promise<void> {
+    try {
+      const leagueName = this.store.activeLeague()?.name ?? 'Jupiter shades';
+      const blob = await scorecardImage({ leagueName, rounds });
+      const week = Math.min(...rounds.map((r) => r.week));
+      this.shareImage.set(new File([blob], `jupiter-shades-tjedan-${week}.png`, { type: 'image/png' }));
+    } catch (e) {
+      console.error(e); // no picture means no share button; the scores are saved either way
+    }
+  }
+
+  private shareText(): string {
+    const rounds = this.submitted()?.rounds ?? [];
+    const leagueName = this.store.activeLeague()?.name ?? 'Jupiter shades';
+    return `${leagueName} · ${weeksLabel(rounds.map((r) => r.week))}`;
+  }
+
   private problemFor(p: CardPlayer): string | null {
     const card = this.card()!;
-    const missing = card.holes.filter((_, i) => this.score(p, i) == null).length;
-    if (missing) return `${missing} ${plural(missing, 'koš', 'koša', 'koševa')} bez rezultata.`;
+    if (card.mode === 'total') {
+      const total = this.total(p);
+      const { min, max } = totalRange(card.holes.length);
+      if (total != null && (total < min || total > max)) return `Upiši između ${min} i ${max} bacanja.`;
+    } else {
+      const missing = card.holes.filter((_, i) => this.score(p, i) == null).length;
+      if (missing) return `${missing} ${plural(missing, 'koš', 'koša', 'koševa')} bez rezultata.`;
+    }
     if (this.store.activeLeague()?.id !== card.leagueId) return 'Aktivna liga se promijenila. Javi se adminu.';
     const options = this.optionsFor(p);
     if (!options.some((o) => sameSlot(o, p.option))) {
@@ -220,5 +319,13 @@ export class ScorecardPage {
         : 'Ovaj tjedan nema više rundi za igranje. Ukloni igrača sa scorecarda.';
     }
     return null;
+  }
+}
+
+function canShareFiles(): boolean {
+  try {
+    return !!navigator.canShare?.({ files: [new File([''], 'test.png', { type: 'image/png' })] });
+  } catch {
+    return false;
   }
 }

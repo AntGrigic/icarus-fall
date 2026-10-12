@@ -4,6 +4,8 @@ Scorecards and standings for a weekly disc golf league, a bit like UDisc or Disc
 
 - **Players don't log in.** They pick their name from a list, or add themselves the first time.
 - **One phone can keep score for the whole flight.** Each player picks their own round type: first round, repeat round, or round in advance.
+- **Or just the final score:** played without the app? Pick the players and enter only each player's total throws, no hole-by-hole card. Admins can do the same from **Admin → Rounds** or from a player's page.
+- **Share the card on WhatsApp:** after a hole-by-hole card is sent, one tap makes a picture of it (every player's name, score and holes) and opens the phone's share menu. Drawn on the phone, so it's free and works offline.
 - **Standings update by themselves** as soon as a card is submitted, with separate **Men** and **Women** tables.
 - **Admin tab:** create leagues, set the number of weeks, close holes for a week, add/edit/delete players, and fix or add rounds.
 - **Works on the course without signal:** the card is saved on the phone, and scores upload when the signal comes back.
@@ -117,7 +119,7 @@ directory/players                { players: { "<playerId>": { firstName, lastNam
 admins/{uid}                     exists = that signed-in user is an admin
 ```
 
-Every player has two slots per week: attempt `1` (first round or advance round) and attempt `2` (the repeat). The rules let players **add** a round to an empty slot but never overwrite one, so the database itself guarantees "only one repeat" and that nobody can change someone else's score. Only admins can edit or delete. Each round stores its holes and pars, so changing the course later doesn't change old results.
+Every player has two slots per week: attempt `1` (first round or advance round) and attempt `2` (the repeat). The rules let players **add** a round to an empty slot but never overwrite one, so the database itself guarantees "only one repeat" and that nobody can change someone else's score. Only admins can edit or delete. Each round stores its holes and pars, so changing the course later doesn't change old results. A round entered as the final score only has an empty `holes` list and keeps its `strokes` and `par`; the rules accept it as it is, nothing to republish.
 
 ## Project structure
 
@@ -129,10 +131,11 @@ src/app/
   data/firebase-backend.ts Firestore + Auth (lazy-loaded)
   data/local-backend.ts    demo mode (localStorage)
   data/firebase.config.ts  loads public/firebase-config.json (git-ignored) at startup
-  play/card.service.ts     the card in progress, saved on the phone
+  play/card.service.ts     the card in progress (hole by hole or final score only), saved on the phone
+  play/scorecard-image.ts  the picture of a finished card for sharing (canvas, in the browser)
   pages/standings          league table, Men / Women
   pages/play               set up a card: players + round type per player
-  pages/scorecard          hole-by-hole scoring, review, submit
+  pages/scorecard          hole-by-hole or final-score entry, review, submit, share
   pages/player             one player's rounds, hole by hole
   pages/admin              league, weeks & closed holes, players, rounds
 public/firebase-config.json  your Firebase keys (git-ignored, not in the repo)

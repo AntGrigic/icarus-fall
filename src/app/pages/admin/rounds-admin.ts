@@ -8,7 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { fullName, normalizeText, roundTypeLabel } from '../../core/league-math';
+import { fullName, isTotalOnly, normalizeText, roundTypeLabel } from '../../core/league-math';
 import { League, Round } from '../../core/models';
 import { DataStore } from '../../data/data-store';
 import { Confirm } from '../../shared/confirm';
@@ -67,6 +67,9 @@ import { RoundEditor, RoundEditorData } from './round-editor';
                   @if (r.editedAt) {
                     <span class="chip">uređena</span>
                   }
+                  @if (isTotalOnly(r)) {
+                    <span class="chip">samo rezultat</span>
+                  }
                 </td>
                 <td [class]="totalClass(r.toPar)">{{ r.toPar | toPar }}</td>
                 <td>{{ r.strokes }}</td>
@@ -116,6 +119,7 @@ export class RoundsAdmin {
   protected readonly week = signal(0);
   protected readonly query = signal('');
   protected readonly typeLabel = roundTypeLabel;
+  protected readonly isTotalOnly = isTotalOnly;
   protected readonly totalClass = totalClass;
   protected readonly day = formatDay;
 
