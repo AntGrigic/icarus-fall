@@ -311,11 +311,13 @@ export interface Standings {
 }
 
 /**
- * Ranking: more counted weeks first, then lowest total to par.
+ * Ranking: lowest total to par first, however many weeks each player has played.
+ * On an equal total the better best round wins, then the better second-best, and so on;
+ * players still level share the place.
  *
- * Every week that has started counts, so a player who skipped weeks can't beat
- * someone who played them all. With `dropWorst = N`, each player's N worst weeks
- * are ignored — a missed week is the worst possible week, so it is dropped first.
+ * A player's total is the sum of their best rounds, one per week that has started. With
+ * `dropWorst = N`, each player's N worst weeks are ignored — a missed week is the worst
+ * possible week, so it is dropped first.
  */
 export function computeStandings(
   league: League,
@@ -365,18 +367,36 @@ export function computeStandings(
     });
   }
 
-  rows.sort(
-    (a, b) =>
-      b.counted - a.counted || (a.total ?? 0) - (b.total ?? 0) || a.name.localeCompare(b.name),
-  );
+  const byScore = (a: StandingRow, b: StandingRow): number => {
+    // Players with nothing counted yet (only rounds in advance) go last.
+    if (a.total === null || b.total === null) return Number(a.total === null) - Number(b.total === null);
+    return a.total - b.total || compareBestRounds(countedScores(a), countedScores(b));
+  };
+  rows.sort((a, b) => byScore(a, b) || a.name.localeCompare(b.name));
 
-  const sameScore = (a: StandingRow, b: StandingRow) => a.counted === b.counted && a.total === b.total;
+  const sameScore = (a: StandingRow, b: StandingRow) => !byScore(a, b);
   rows.forEach((row, i) => {
-    if (!row.counted) return;
+    if (row.total === null) return;
     const prev = rows[i - 1];
     row.rank = prev && sameScore(prev, row) ? prev.rank : i + 1;
     row.tied = (!!prev && sameScore(prev, row)) || (!!rows[i + 1] && sameScore(rows[i + 1], row));
   });
 
   return { rows, info, consideredWeeks, countingWeeks };
+}
+
+/** The player's counted rounds to par, best first. */
+function countedScores(row: StandingRow): number[] {
+  return row.cells
+    .filter((c): c is WeekCell => !!c?.counted)
+    .map((c) => c.round.toPar)
+    .sort((a, b) => a - b);
+}
+
+/** Tiebreaker for an equal total: the better best round wins, then the better second-best, and so on. */
+function compareBestRounds(a: number[], b: number[]): number {
+  for (let i = 0; i < Math.min(a.length, b.length); i++) {
+    if (a[i] !== b[i]) return a[i] - b[i];
+  }
+  return 0;
 }

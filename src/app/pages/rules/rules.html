@@ -1,0 +1,86 @@
+<div class="page narrow">
+  @if (!store.ready()) {
+    <div class="loading"><span class="coin-loader" role="progressbar" aria-label="Učitavanje"></span></div>
+  } @else {
+    <header class="page-head">
+      <div class="title-block">
+        <h1>Pravila igre</h1>
+        @if (league(); as l) {
+          <p class="muted sub">{{ l.name }}</p>
+        }
+      </div>
+      @if (store.isAdmin() && league() && !editing()) {
+        <button mat-stroked-button (click)="edit()">
+          <mat-icon>edit</mat-icon>
+          Uredi pravila
+        </button>
+      }
+    </header>
+
+    @if (editing() && store.isAdmin()) {
+      <form class="panel editor" (ngSubmit)="save()">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Pravila</mat-label>
+          <textarea
+            matInput
+            name="rules"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="12"
+            [(ngModel)]="draft"
+          ></textarea>
+        </mat-form-field>
+        <p class="muted help">
+          Naslov počni s <code>#</code>, svako pravilo s brojem (<code>1.</code>), a podtočku s <code>-</code>.
+          Ostali redovi nastavljaju pravilo iznad njih.
+        </p>
+        @if (error()) {
+          <p class="error-text">{{ error() }}</p>
+        }
+        <div class="actions">
+          <button mat-button type="button" (click)="editing.set(false)">Odustani</button>
+          <button mat-flat-button type="submit" [disabled]="saving()">
+            <mat-icon>save</mat-icon>
+            Spremi pravila
+          </button>
+        </div>
+      </form>
+    } @else if (!blocks().length) {
+      <div class="empty-state">
+        <mat-icon>menu_book</mat-icon>
+        <h2>Pravila još nisu upisana</h2>
+        <p>Admin ih može upisati ovdje.</p>
+      </div>
+    } @else {
+      <article class="panel framed rules">
+        @for (block of blocks(); track $index) {
+          @if (block.kind === 'heading') {
+            <h2 class="title">{{ block.text }}</h2>
+          } @else if (block.kind === 'rule') {
+            <section class="rule">
+              <span class="num">{{ block.number }}</span>
+              <div class="body">
+                @for (part of block.parts; track $index) {
+                  <ng-container *ngTemplateOutlet="partTpl; context: { $implicit: part }" />
+                }
+              </div>
+            </section>
+          } @else {
+            <ng-container *ngTemplateOutlet="partTpl; context: { $implicit: block }" />
+          }
+        }
+      </article>
+    }
+  }
+</div>
+
+<ng-template #partTpl let-part>
+  @if (part.kind === 'list') {
+    <ul>
+      @for (item of part.items; track $index) {
+        <li>{{ item }}</li>
+      }
+    </ul>
+  } @else {
+    <p>{{ part.text }}</p>
+  }
+</ng-template>

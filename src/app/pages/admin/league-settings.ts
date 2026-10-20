@@ -24,6 +24,8 @@ interface Draft {
   override: number;
   pars: number[];
   weeks: Record<string, WeekSettings>;
+  /** Not edited here (see the rules page), but kept when the league is saved. */
+  rules: string | undefined;
   createdAt: number;
 }
 
@@ -154,10 +156,11 @@ export class LeagueSettings {
         override: league.currentWeekOverride ?? 0,
         pars: league.holes.map((h) => h.par),
         weeks: league.weeks,
+        rules: league.rules,
         createdAt: league.createdAt,
       };
     }
-    // New league: reuse the course from the current league, it is usually the same.
+    // New league: reuse the course and rules from the current league, they are usually the same.
     const template = this.store.activeLeague();
     return {
       id: null,
@@ -168,6 +171,7 @@ export class LeagueSettings {
       override: 0,
       pars: template?.holes.map((h) => h.par) ?? Array.from({ length: 18 }, () => 3),
       weeks: {},
+      rules: template?.rules,
       createdAt: Date.now(),
     };
   }
@@ -190,6 +194,7 @@ export class LeagueSettings {
       dropWorst: d.dropWorst,
       currentWeekOverride: d.override ? Math.min(d.override, d.totalWeeks) : null,
       weeks,
+      rules: d.rules,
       createdAt: d.createdAt,
     };
   }

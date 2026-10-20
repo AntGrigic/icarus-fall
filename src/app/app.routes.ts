@@ -23,6 +23,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/scorecard/scorecard').then((m) => m.ScorecardPage),
   },
   {
+    path: 'rules',
+    title: 'Pravila igre',
+    loadComponent: () => import('./pages/rules/rules').then((m) => m.RulesPage),
+  },
+  {
     path: 'admin',
     title: 'Admin',
     loadComponent: () => import('./pages/admin/admin').then((m) => m.AdminPage),

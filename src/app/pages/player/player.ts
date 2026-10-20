@@ -50,7 +50,7 @@ import type { RoundEditorData } from '../admin/round-editor';
           <article class="panel week" [class.faded]="cell.dropped || cell.pending">
             <div class="week-head">
               <strong>Tjedan {{ cell.week }}</strong>
-              <span class="chip">{{ typeLabel(cell.round.type) }}</span>
+              <span class="chip">{{ typeLabel(cell) }}</span>
               @if (cell.pending) {
                 <span class="chip">Broji se od {{ cell.week }}. tjedna</span>
               }
@@ -122,7 +122,6 @@ export class PlayerPage {
 
   protected readonly scoreClass = scoreClass;
   protected readonly totalClass = totalClass;
-  protected readonly typeLabel = roundTypeLabel;
   protected readonly isTotalOnly = isTotalOnly;
   protected readonly day = formatDay;
 
@@ -141,6 +140,11 @@ export class PlayerPage {
       ) ?? null
     );
   });
+
+  /** A round played in advance is just that week's round once the week has started. */
+  protected typeLabel(cell: WeekCell): string {
+    return roundTypeLabel(cell.round.type === 'advance' && !cell.pending ? 'first' : cell.round.type);
+  }
 
   protected readonly cells = computed(() =>
     (this.row()?.cells ?? []).filter((c): c is WeekCell => !!c).reverse(),

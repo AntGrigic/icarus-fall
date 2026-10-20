@@ -28,6 +28,7 @@ export class App {
   protected readonly nav = [
     { path: '/standings', icon: 'leaderboard', label: 'Poredak' },
     { path: '/play', icon: 'edit_note', label: 'Igraj' },
+    { path: '/rules', icon: 'menu_book', label: 'Pravila igre' },
     { path: '/admin', icon: 'admin_panel_settings', label: 'Admin' },
   ];
 
@@ -48,9 +49,8 @@ export class App {
   /** Which nav item the sliding highlight sits under. A player's page belongs to the standings. */
   protected readonly activeIndex = computed(() => {
     const path = this.url().split(/[?#]/)[0];
-    if (path.startsWith('/admin')) return 2;
-    if (path === '/play' || path.startsWith('/play/')) return 1;
-    return 0;
+    const index = this.nav.findIndex((item) => path === item.path || path.startsWith(`${item.path}/`));
+    return Math.max(0, index);
   });
 
   constructor() {

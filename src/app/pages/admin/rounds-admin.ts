@@ -45,8 +45,8 @@ import { RoundEditor, RoundEditorData } from './round-editor';
         <table>
           <thead>
             <tr>
-              <th>Tj.</th>
-              <th class="left">Igrač</th>
+              <th class="wk">Tj.</th>
+              <th class="left who">Igrač</th>
               <th class="left">Runda</th>
               <th>Rezultat</th>
               <th>Bacanja</th>
@@ -57,8 +57,8 @@ import { RoundEditor, RoundEditorData } from './round-editor';
           <tbody>
             @for (r of rounds(); track r.playerId + r.week + r.attempt) {
               <tr [class.replaced]="isReplaced(r)">
-                <td>{{ r.week }}</td>
-                <td class="left">{{ nameOf(r) }}</td>
+                <td class="wk">{{ r.week }}</td>
+                <td class="left who">{{ nameOf(r) }}</td>
                 <td class="left">
                   {{ typeLabel(r.type) }}
                   @if (isReplaced(r)) {
@@ -96,14 +96,22 @@ import { RoundEditor, RoundEditorData } from './round-editor';
       overflow-x: auto; border: 1px solid var(--rule-strong); border-radius: var(--radius);
       background: var(--panel); box-shadow: var(--shadow-1);
     }
-    table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
     th, td { padding: 6px 8px; text-align: center; white-space: nowrap; border-bottom: 1px solid var(--rule); }
     th { font: var(--mat-sys-label-medium); letter-spacing: 0.04em; text-transform: uppercase; color: var(--mat-sys-on-surface-variant); padding: 12px 8px; }
-    tbody tr:hover td { background: color-mix(in srgb, var(--gold) 9%, transparent); }
+    tbody tr:hover td {
+      background-image: linear-gradient(color-mix(in srgb, var(--gold) 9%, transparent), color-mix(in srgb, var(--gold) 9%, transparent));
+    }
+    /* Week and player stay in view while the rest of the row scrolls on a phone. */
+    .wk, .who { position: sticky; z-index: 1; background-color: var(--panel); }
+    .wk { left: 0; width: 40px; min-width: 40px; box-sizing: border-box; }
+    .who { left: 40px; box-shadow: 1px 0 0 var(--rule); }
     tbody tr:last-child td { border-bottom: 0; }
     .left { text-align: left; }
     .actions { text-align: right; }
-    .replaced td { opacity: 0.55; }
+    .replaced td:not(.wk, .who) { opacity: 0.55; }
+    /* Pinned cells fade their text only, so what scrolls under them doesn't show through. */
+    .replaced :is(.wk, .who) { color: color-mix(in srgb, var(--mat-sys-on-surface) 55%, transparent); }
     .chip { margin-left: 4px; }
     .empty { padding: 24px; }
   `,

@@ -126,7 +126,7 @@ describe('roundOptions', () => {
 describe('computeStandings', () => {
   const finished = at('2026-12-01');
 
-  it('ranks a player who played every week above one who skipped weeks', () => {
+  it('ranks by lowest total, however many weeks were played', () => {
     // Bato: 8 weeks, total -20, including two bad days (+10, +5).
     const bato = [-6, -5, 10, -4, 5, -7, -6, -7].map((s, i) => round('bato', i + 1, s));
     // Ivan: only 3 weeks, -23.
@@ -134,8 +134,31 @@ describe('computeStandings', () => {
     const { rows } = computeStandings(league(), [...bato, ...ivan], [player('bato'), player('ivan')], 'M', finished);
 
     expect(rows.map((r) => [r.playerId, r.total, r.counted, r.rank])).toEqual([
-      ['bato', -20, 8, 1],
-      ['ivan', -23, 3, 2],
+      ['ivan', -23, 3, 1],
+      ['bato', -20, 8, 2],
+    ]);
+  });
+
+  it('breaks a tied total on the best round, then the next best', () => {
+    const rounds = [
+      ...[-5, -5, -10].map((s, i) => round('a', i + 1, s)), // -20, best -10
+      ...[-6, -6, -8].map((s, i) => round('b', i + 1, s)), // -20, best -8
+      ...[-4, -6, -10].map((s, i) => round('c', i + 1, s)), // -20, best -10, then -6
+    ];
+    const { rows } = computeStandings(league(), rounds, [player('a'), player('b'), player('c')], 'M', finished);
+    expect(rows.map((r) => [r.playerId, r.rank, r.tied])).toEqual([
+      ['c', 1, false],
+      ['a', 2, false],
+      ['b', 3, false],
+    ]);
+  });
+
+  it('puts players with only rounds in advance last, without a place', () => {
+    const rounds = [round('a', 2, 5), round('b', 3, -9, 1, 'advance')];
+    const { rows } = computeStandings(league(), rounds, [player('a'), player('b')], 'M', at('2026-09-15')); // week 2
+    expect(rows.map((r) => [r.playerId, r.total, r.rank])).toEqual([
+      ['a', 5, 1],
+      ['b', null, null],
     ]);
   });
 

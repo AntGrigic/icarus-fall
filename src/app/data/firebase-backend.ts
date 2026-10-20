@@ -234,6 +234,7 @@ function toLeague(id: string, data: DocumentData): League {
     dropWorst: data['dropWorst'] ?? 0,
     currentWeekOverride: data['currentWeekOverride'] ?? null,
     weeks: data['weeks'] ?? {},
+    rules: data['rules'],
     createdAt: data['createdAt'] ?? 0,
   };
 }

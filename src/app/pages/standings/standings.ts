@@ -54,6 +54,11 @@ export class StandingsPage {
     return { M: all?.M.rows.length ?? 0, W: all?.W.rows.length ?? 0 };
   });
 
+  /** Someone has played a week that hasn't started yet. */
+  protected readonly hasPending = computed(
+    () => this.standings()?.rows.some((row) => row.cells.some((c) => c?.pending)) ?? false,
+  );
+
   protected readonly weeks = computed(() =>
     Array.from({ length: this.league()?.totalWeeks ?? 0 }, (_, i) => i + 1),
   );

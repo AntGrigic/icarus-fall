@@ -120,7 +120,8 @@
                       <span [class]="totalClass(cell.round.toPar)">{{ cell.round.toPar | toPar }}</span>
                       @if (cell.replaced) {
                         <sup>P</sup>
-                      } @else if (cell.round.type === 'advance') {
+                      } @else if (cell.pending) {
+                        <!-- Only until its week starts; then it is simply that week's round. -->
                         <mat-icon class="ahead">fast_forward</mat-icon>
                       }
                     } @else {
@@ -136,7 +137,9 @@
 
       <ul class="legend muted">
         <li><sup>P</sup> ponovljena runda (zamjenjuje prvi pokušaj)</li>
-        <li><mat-icon class="ahead">fast_forward</mat-icon> odigrano unaprijed</li>
+        @if (hasPending()) {
+          <li><mat-icon class="ahead">fast_forward</mat-icon> odigrano unaprijed</li>
+        }
         @if (league()!.dropWorst) {
           <li><span class="sample dropped">+6</span> tjedan koji se ne broji</li>
         }

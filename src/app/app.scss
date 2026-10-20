@@ -161,12 +161,26 @@
     height: 40px;
     padding: 0 18px;
     font: 600 16px / 1 var(--font-text);
+    white-space: nowrap;
   }
 
   mat-icon {
     font-size: 19px;
     width: 19px;
     height: 19px;
+  }
+}
+
+/* Tablets: words only, so the league name keeps some room next to four buttons. */
+@media (max-width: 999px) {
+  .top-nav {
+    a {
+      padding: 0 12px;
+    }
+
+    mat-icon {
+      display: none;
+    }
   }
 }
 

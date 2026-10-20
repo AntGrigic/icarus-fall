@@ -28,6 +28,8 @@ export interface League {
   currentWeekOverride: number | null;
   /** Per-week settings keyed by week number. */
   weeks: Record<string, WeekSettings>;
+  /** Rules of play shown on the "Pravila igre" page; missing = the default rules. */
+  rules?: string;
   createdAt: number;
 }
 

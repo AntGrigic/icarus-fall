@@ -117,4 +117,10 @@
   ::ng-deep .mat-mdc-tab-body-content {
     overflow: visible;
   }
+
+  // Without its own scroll box a tab would grow as wide as its widest table and slide off a
+  // phone screen; this keeps it to the screen width so the table scrolls inside its frame.
+  ::ng-deep .mat-mdc-tab-body {
+    min-width: 0;
+  }
 }

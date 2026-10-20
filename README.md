@@ -7,6 +7,7 @@ Scorecards and standings for a weekly disc golf league, a bit like UDisc or Disc
 - **Or just the final score:** played without the app? Pick the players and enter only each player's total throws, no hole-by-hole card. Admins can do the same from **Admin → Rounds** or from a player's page.
 - **Share the card on WhatsApp:** after a hole-by-hole card is sent, one tap makes a picture of it (every player's name, score and holes) and opens the phone's share menu. Drawn on the phone, so it's free and works offline.
 - **Standings update by themselves** as soon as a card is submitted, with separate **Men** and **Women** tables.
+- **Pravila igre (rules) tab:** the league's rules for everyone to read. Signed-in admins edit them right on that page.
 - **Admin tab:** create leagues, set the number of weeks, close holes for a week, add/edit/delete players, and fix or add rounds.
 - **Works on the course without signal:** the card is saved on the phone, and scores upload when the signal comes back.
 
@@ -19,11 +20,11 @@ Built with Angular 21 + Angular Material, Firebase (Firestore + Auth) for data, 
 | Rule                        | How it works                                                                                                                                                                                    |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Weeks                       | Week 1 starts on the league's start date; every week is 7 days. The admin can force a different current week (for example, after a rained-out week).                                            |
-| Ranking                     | **More weeks played first, then lowest total to par.** Every week that has started counts, so someone who played 3 weeks at −23 can't beat someone who played all 8 weeks at −20.               |
+| Ranking                     | **Lowest total to par first, however many weeks were played.** On an equal total the better best round wins, then the better second-best, and so on; players still level share the place.      |
 | Drop worst weeks (optional) | The admin can drop each player's N worst weeks. A missed week counts as the worst possible week, so it is dropped first.                                                                        |
 | First round                 | One per week, for the current week. Someone who joins in week 4 just starts in week 4.                                                                                                          |
 | Repeat round                | One per week. **The repeat always counts instead of the first round, even if it's worse.** Only for the current week, or for next week's round played in advance. Past weeks can't be repeated. |
-| Round in advance            | Play next week's round early. It shows on the table straight away and counts once its week starts. It can be repeated once, now or when its week arrives.                                       |
+| Round in advance            | Play next week's round early. It shows on the table straight away, marked as played in advance, and counts once its week starts (the mark goes away then). It can be repeated once, now or when its week arrives. |
 | Closed holes                | The admin can close holes for a single week (e.g. 9 and 10 when they're slippery). They are left off that week's scorecard. Totals compare scores to par, so a shorter round is still fair.     |
 
 ---
@@ -113,7 +114,8 @@ Keeping `firebase-config.json` out of git means the keys aren't in the repo, and
 ```
 config/app                       { activeLeagueId }
 leagues/{leagueId}               name, startDate, totalWeeks, holes[{number, par}], dropWorst,
-                                 currentWeekOverride, weeks: { "4": { disabledHoles: [9, 10] } }
+                                 currentWeekOverride, weeks: { "4": { disabledHoles: [9, 10] } },
+                                 rules (text of the rules page; missing = the default rules)
 leagues/{leagueId}/weeks/{week}  { rounds: { "<playerId>_<attempt>": Round } }
 directory/players                { players: { "<playerId>": { firstName, lastName, division } } }
 admins/{uid}                     exists = that signed-in user is an admin
@@ -127,6 +129,7 @@ Every player has two slots per week: attempt `1` (first round or advance round) 
 src/app/
   core/league-math.ts      all league rules: current week, round options, standings (unit-tested)
   core/models.ts           League, Player, Round types
+  core/rules.ts            default rules text and how it is split into numbered rules
   data/data-store.ts       app-wide signals + write methods used by the pages
   data/firebase-backend.ts Firestore + Auth (lazy-loaded)
   data/local-backend.ts    demo mode (localStorage)
@@ -137,6 +140,7 @@ src/app/
   pages/play               set up a card: players + round type per player
   pages/scorecard          hole-by-hole or final-score entry, review, submit, share
   pages/player             one player's rounds, hole by hole
+  pages/rules              rules of play ("Pravila igre"), editable by admins
   pages/admin              league, weeks & closed holes, players, rounds
 public/firebase-config.json  your Firebase keys (git-ignored, not in the repo)
 firestore.rules            security rules (paste into Firebase)
